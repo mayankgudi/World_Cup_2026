@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register - World Cup Predictor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+    <div class="page-container auth-page">
+        <header class="site-header">
+            <h1>Create Account</h1>
+            <p>Make an account to save up to 3 World Cup brackets.</p>
+        </header>
+
+        <form method="POST" class="auth-card">
+            {% if error %}
+                <div class="error">{{ error }}</div>
+            {% endif %}
+
+            <label>Username</label>
+            <input type="text" name="username" required>
+
+            <label>Email</label>
+            <input type="email" name="email" required>
+
+            <label>Password</label>
+            <input type="password" name="password" required>
+
+            <button type="submit" class="main-button">Create Account</button>
+
+            <p class="auth-switch">
+                Already have an account?
+                <a href="{{ url_for('login') }}">Log in</a>
+            </p>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Saved Bracket</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+    <div class="page-container">
+        <header class="site-header">
+            <h1>{{ prediction.bracket_name }}</h1>
+            <p>By {{ prediction.username }} · Saved prediction #{{ prediction.id }}</p>
+        </header>
+
+        {% set knockout = prediction.knockout_picks %}
+
+        <div class="saved-top-summary">
+            <div class="result-card champion-result">
+                <h2>Champion</h2>
+                <p>{{ knockout.get("champion", "TBD") }}</p>
+            </div>
+
+            <div class="result-card third-result">
+                <h2>Third Place</h2>
+                <p>{{ knockout.get("third_place", "TBD") }}</p>
+            </div>
+        </div>
+
+        <section class="saved-section">
+            <h2>Group Stage Picks</h2>
+
+            <div class="saved-groups-grid">
+                {% for group_letter, results in prediction.group_results.items() %}
+                    <div class="saved-group-card">
+                        <h3>Group {{ group_letter }}</h3>
+
+                        <div class="saved-standing first">
+                            <span class="standing-rank">1</span>
+                            <span class="standing-label">1st Place</span>
+                            <span class="standing-team">{{ results.first }}</span>
+                        </div>
+
+                        <div class="saved-standing second">
+                            <span class="standing-rank">2</span>
+                            <span class="standing-label">2nd Place</span>
+                            <span class="standing-team">{{ results.second }}</span>
+                        </div>
+
+                        <div class="saved-standing third">
+                            <span class="standing-rank">3</span>
+                            <span class="standing-label">3rd Place</span>
+                            <span class="standing-team">{{ results.third }}</span>
+                        </div>
+
+                        <div class="saved-standing fourth">
+                            <span class="standing-rank">4</span>
+                            <span class="standing-label">4th Place</span>
+                            <span class="standing-team">{{ results.fourth }}</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="saved-section">
+            <h2>Third-Place Ranking</h2>
+            <p class="section-helper">The top 8 third-place teams qualified for the Round of 32.</p>
+
+            <div class="third-place-saved-list">
+                {% for group_letter in prediction.third_place_ranking %}
+                    {% set group_results = prediction.group_results[group_letter] %}
+
+                    <div class="third-place-saved-row {% if loop.index <= 8 %}qualified-row{% else %}eliminated-row{% endif %}">
+                        <span class="third-rank-number">{{ loop.index }}</span>
+
+                        <span class="third-team">
+                            <strong>{{ group_results.third }}</strong>
+                            <small>Group {{ group_letter }}</small>
+                        </span>
+
+                        {% if loop.index <= 8 %}
+                            <span class="status-pill qualified-pill">Qualified</span>
+                        {% else %}
+                            <span class="status-pill eliminated-pill">Eliminated</span>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="saved-section">
+            <h2>Knockout Picks</h2>
+            <p class="section-helper">Every selected match winner from the saved bracket.</p>
+
+            {% for round_key, round_title in [
+                ("round_of_32", "Round of 32"),
+                ("round_of_16", "Round of 16"),
+                ("quarterfinals", "Quarterfinals"),
+                ("semifinals", "Semifinals")
+            ] %}
+                <div class="saved-round-block">
+                    <h3>{{ round_title }}</h3>
+
+                    <div class="saved-match-grid">
+                        {% for match in knockout.get(round_key, []) %}
+                            <div class="saved-match-card">
+                                <div class="saved-match-title">
+                                    {{ round_title }} Match {{ match.match_index + 1 }}
+                                </div>
+
+                                <div class="saved-team-line {% if match.winner and match.winner.name == match.team_1.name %}picked-winner{% endif %}">
+                                    <span class="slot-label">{{ match.team_1.slot }}</span>
+                                    <span>{{ match.team_1.name }}</span>
+                                </div>
+
+                                <div class="saved-team-line {% if match.winner and match.winner.name == match.team_2.name %}picked-winner{% endif %}">
+                                    <span class="slot-label">{{ match.team_2.slot }}</span>
+                                    <span>{{ match.team_2.name }}</span>
+                                </div>
+
+                                <div class="saved-winner-box">
+                                    Winner:
+                                    {% if match.winner %}
+                                        <strong>{{ match.winner.name }}</strong>
+                                    {% else %}
+                                        <strong>TBD</strong>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+
+            <div class="saved-round-block">
+                <h3>Third-Place Match</h3>
+
+                {% set third_place_match = knockout.get("third_place_match") %}
+                {% if third_place_match %}
+                    <div class="saved-match-grid single-match-grid">
+                        <div class="saved-match-card special-match-card">
+                            <div class="saved-match-title">Third-Place Match</div>
+
+                            <div class="saved-team-line {% if third_place_match.winner and third_place_match.winner.name == third_place_match.team_1.name %}picked-winner{% endif %}">
+                                <span class="slot-label">{{ third_place_match.team_1.slot }}</span>
+                                <span>{{ third_place_match.team_1.name }}</span>
+                            </div>
+
+                            <div class="saved-team-line {% if third_place_match.winner and third_place_match.winner.name == third_place_match.team_2.name %}picked-winner{% endif %}">
+                                <span class="slot-label">{{ third_place_match.team_2.slot }}</span>
+                                <span>{{ third_place_match.team_2.name }}</span>
+                            </div>
+
+                            <div class="saved-winner-box bronze-winner">
+                                Third Place:
+                                {% if third_place_match.winner %}
+                                    <strong>{{ third_place_match.winner.name }}</strong>
+                                {% else %}
+                                    <strong>TBD</strong>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <p class="empty-note">No third-place match pick saved.</p>
+                {% endif %}
+            </div>
+
+            <div class="saved-round-block">
+                <h3>Final</h3>
+
+                {% set final_match = knockout.get("final") %}
+                {% if final_match %}
+                    <div class="saved-match-grid single-match-grid">
+                        <div class="saved-match-card special-match-card final-saved-card">
+                            <div class="saved-match-title">Final</div>
+
+                            <div class="saved-team-line {% if final_match.winner and final_match.winner.name == final_match.team_1.name %}picked-winner{% endif %}">
+                                <span class="slot-label">{{ final_match.team_1.slot }}</span>
+                                <span>{{ final_match.team_1.name }}</span>
+                            </div>
+
+                            <div class="saved-team-line {% if final_match.winner and final_match.winner.name == final_match.team_2.name %}picked-winner{% endif %}">
+                                <span class="slot-label">{{ final_match.team_2.slot }}</span>
+                                <span>{{ final_match.team_2.name }}</span>
+                            </div>
+
+                            <div class="saved-winner-box champion-winner">
+                                Champion:
+                                {% if final_match.winner %}
+                                    <strong>{{ final_match.winner.name }}</strong>
+                                {% else %}
+                                    <strong>TBD</strong>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <p class="empty-note">No final pick saved.</p>
+                {% endif %}
+            </div>
+        </section>
+
+        <div class="button-row">
+            <a href="{{ url_for('saved_brackets') }}" class="secondary-button">Back to Saved Brackets</a>
+
+            {% if prediction.user_id == session["user_id"] %}
+                <a href="{{ url_for('edit_bracket', prediction_id=prediction.id) }}" class="main-button">
+                    Edit This Bracket
+                </a>
+            {% endif %}
+
+            <a href="{{ url_for('new_bracket') }}" class="main-button">Create New Bracket</a>
+        </div>
+    </div>
+</body>
+</html>

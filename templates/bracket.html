@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>2026 World Cup Predictor - Bracket</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+    <div class="page-container bracket-page">
+        <header class="site-header">
+            <h1>World Cup Bracket</h1>
+            <p>Step 3 of 3: Click a team to advance them through the knockout stage.</p>
+        </header>
+
+        <div class="step-bar">
+            <div class="step completed">1. Group Stage</div>
+            <div class="step completed">2. Third-Place Ranking</div>
+            <div class="step active">3. Bracket</div>
+        </div>
+
+        {% if editing_bracket_id %}
+            <div class="save-card">
+                <h2>Editing Saved Bracket</h2>
+                <p>You are updating an existing bracket. Saving will overwrite the previous version.</p>
+            </div>
+        {% endif %}
+
+        <div class="button-row">
+            <a href="{{ url_for('saved_brackets') }}" class="secondary-button">My Saved Brackets</a>
+            <a href="{{ url_for('logout') }}" class="danger-button">Logout</a>
+        </div>
+
+        {% if error %}
+            <div class="error">
+                {{ error }}
+            </div>
+        {% endif %}
+
+        {% if bracket %}
+            <div class="bracket-wrapper">
+                <div class="bracket-column">
+                    <h2>Round of 32</h2>
+
+                    {% for game in bracket %}
+                        <div
+                            class="bracket-match"
+                            data-round="32"
+                            data-match-index="{{ loop.index0 }}"
+                            data-next-round="16"
+                            data-next-match-index="{{ loop.index0 // 2 }}"
+                            data-next-team-position="{{ loop.index0 % 2 }}"
+                        >
+                            <button
+                                type="button"
+                                class="team-button"
+                                data-team="{{ game.team_1 }}"
+                                data-slot="{{ game.slot_1 }}"
+                            >
+                                <span class="slot-label">{{ game.slot_1 }}</span>
+                                <span class="team-name">{{ game.team_1 }}</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                class="team-button"
+                                data-team="{{ game.team_2 }}"
+                                data-slot="{{ game.slot_2 }}"
+                            >
+                                <span class="slot-label">{{ game.slot_2 }}</span>
+                                <span class="team-name">{{ game.team_2 }}</span>
+                            </button>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="bracket-column">
+                    <h2>Round of 16</h2>
+
+                    {% for i in range(8) %}
+                        <div
+                            class="bracket-match empty-match"
+                            data-round="16"
+                            data-match-index="{{ i }}"
+                            data-next-round="8"
+                            data-next-match-index="{{ i // 2 }}"
+                            data-next-team-position="{{ i % 2 }}"
+                        >
+                            <button type="button" class="team-button placeholder" data-team="">
+                                <span class="slot-label">TBD</span>
+                                <span class="team-name">Winner Match {{ i * 2 + 1 }}</span>
+                            </button>
+
+                            <button type="button" class="team-button placeholder" data-team="">
+                                <span class="slot-label">TBD</span>
+                                <span class="team-name">Winner Match {{ i * 2 + 2 }}</span>
+                            </button>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="bracket-column">
+                    <h2>Quarterfinals</h2>
+
+                    {% for i in range(4) %}
+                        <div
+                            class="bracket-match empty-match"
+                            data-round="8"
+                            data-match-index="{{ i }}"
+                            data-next-round="4"
+                            data-next-match-index="{{ i // 2 }}"
+                            data-next-team-position="{{ i % 2 }}"
+                        >
+                            <button type="button" class="team-button placeholder" data-team="">
+                                <span class="slot-label">TBD</span>
+                                <span class="team-name">Winner R16 {{ i * 2 + 1 }}</span>
+                            </button>
+
+                            <button type="button" class="team-button placeholder" data-team="">
+                                <span class="slot-label">TBD</span>
+                                <span class="team-name">Winner R16 {{ i * 2 + 2 }}</span>
+                            </button>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="bracket-column">
+                    <h2>Semifinals</h2>
+
+                    {% for i in range(2) %}
+                        <div
+                            class="bracket-match empty-match"
+                            data-round="4"
+                            data-match-index="{{ i }}"
+                            data-next-round="2"
+                            data-next-match-index="0"
+                            data-next-team-position="{{ i }}"
+                        >
+                            <button type="button" class="team-button placeholder" data-team="">
+                                <span class="slot-label">TBD</span>
+                                <span class="team-name">Winner QF {{ i * 2 + 1 }}</span>
+                            </button>
+
+                            <button type="button" class="team-button placeholder" data-team="">
+                                <span class="slot-label">TBD</span>
+                                <span class="team-name">Winner QF {{ i * 2 + 2 }}</span>
+                            </button>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="bracket-column final-column">
+                    <h2>Third-Place Match</h2>
+
+                    <div class="bracket-match empty-match third-place-match" data-round="3" data-match-index="0">
+                        <button type="button" class="team-button placeholder" data-team="">
+                            <span class="slot-label">TBD</span>
+                            <span class="team-name">Loser SF 1</span>
+                        </button>
+
+                        <button type="button" class="team-button placeholder" data-team="">
+                            <span class="slot-label">TBD</span>
+                            <span class="team-name">Loser SF 2</span>
+                        </button>
+                    </div>
+
+                    <div class="third-place-box">
+                        <h2>Third Place</h2>
+                        <div id="third-place-name">TBD</div>
+                    </div>
+
+                    <h2 class="final-heading">Final</h2>
+
+                    <div
+                        class="bracket-match empty-match final-match"
+                        data-round="2"
+                        data-match-index="0"
+                    >
+                        <button type="button" class="team-button placeholder" data-team="">
+                            <span class="slot-label">TBD</span>
+                            <span class="team-name">Winner SF 1</span>
+                        </button>
+
+                        <button type="button" class="team-button placeholder" data-team="">
+                            <span class="slot-label">TBD</span>
+                            <span class="team-name">Winner SF 2</span>
+                        </button>
+                    </div>
+
+                    <div class="champion-box">
+                        <h2>Champion</h2>
+                        <div id="champion-name">TBD</div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="button-row">
+            <a href="{{ url_for('saved_brackets') }}" class="secondary-button">View All Brackets</a>
+            <a href="{{ url_for('third_place') }}" class="secondary-button">Back to Third-Place Ranking</a>
+            <a href="{{ url_for('reset') }}" class="danger-button">Start Over</a>
+        </div>
+    </div>
+
+    <form method="POST" action="{{ url_for('save_bracket') }}" id="save-bracket-form">
+        <div class="save-card">
+            <h2>
+                {% if editing_bracket_id %}
+                    Update Your Bracket
+                {% else %}
+                    Save Your Bracket
+                {% endif %}
+            </h2>
+
+            <label for="bracket_name">Bracket Name</label>
+            <input
+                type="text"
+                id="bracket_name"
+                name="bracket_name"
+                placeholder="Example: Mayank's Upset Bracket"
+                value="{{ bracket_name or '' }}"
+                required
+            >
+
+            <input type="hidden" name="knockout_picks" id="knockout-picks-input">
+
+            <div class="button-row">
+                <button type="submit" class="main-button">
+                    {% if editing_bracket_id %}
+                        Update Bracket
+                    {% else %}
+                        Save Bracket
+                    {% endif %}
+                </button>
+
+                <a href="{{ url_for('saved_brackets') }}" class="secondary-button">
+                    View Saved Brackets
+                </a>
+            </div>
+        </div>
+    </form>
+
+    <script id="saved-knockout-picks-data" type="application/json">
+        {{ saved_knockout_picks | default(none) | tojson }}
+    </script>
+
+
+    <script>
+    const savedKnockoutPicksElement = document.getElementById("saved-knockout-picks-data");
+
+    let SAVED_KNOCKOUT_PICKS = null;
+
+    if (savedKnockoutPicksElement) {
+        const rawSavedPicks = savedKnockoutPicksElement.textContent.trim();
+
+        if (rawSavedPicks && rawSavedPicks !== "null") {
+            SAVED_KNOCKOUT_PICKS = JSON.parse(rawSavedPicks);
+        }
+    }
+
+
+    function clearDownstreamRounds(currentRound, nextMatchIndex) {
+        /*
+            This clears only the rounds AFTER the immediate next round.
+
+            Example:
+            If you change a Round of 32 pick, we should NOT clear the other slot
+            in the Round of 16 match. But we should clear Quarterfinals,
+            Semifinals, Final, and Champion because those may now be invalid.
+        */
+
+        const downstreamMap = {
+            32: [8, 4, 2],
+            16: [4, 2],
+            8: [2],
+            4: [],
+            2: []
+        };
+
+        const roundsToClear = downstreamMap[currentRound] || [];
+
+        roundsToClear.forEach((round) => {
+            const matches = document.querySelectorAll(`.bracket-match[data-round="${round}"]`);
+
+            matches.forEach((match) => {
+                const buttons = match.querySelectorAll(".team-button");
+
+                buttons.forEach((button) => {
+                    button.classList.add("placeholder");
+                    button.classList.remove("selected");
+                    button.dataset.team = "";
+                    button.dataset.slot = "";
+
+                    const slotLabel = button.querySelector(".slot-label");
+                    const teamName = button.querySelector(".team-name");
+
+                    slotLabel.textContent = "TBD";
+                    teamName.textContent = "TBD";
+                });
+            });
+        });
+
+        document.getElementById("champion-name").textContent = "TBD";
+        document.getElementById("third-place-name").textContent = "TBD";
+    }
+
+    function clearNextRoundSelection(nextRound, nextMatchIndex) {
+        /*
+            This clears only the selected styling in the next match.
+
+            Example:
+            If Brazil and France are already in the Round of 16, and you change
+            Brazil's original Round of 32 result, the Round of 16 winner pick
+            should be reset, but France should stay visible.
+        */
+
+        const nextMatch = document.querySelector(
+            `.bracket-match[data-round="${nextRound}"][data-match-index="${nextMatchIndex}"]`
+        );
+
+        if (!nextMatch) {
+            return;
+        }
+
+        const buttons = nextMatch.querySelectorAll(".team-button");
+
+        buttons.forEach((button) => {
+            button.classList.remove("selected");
+        });
+    }
+
+    function advanceTeam(currentMatch, selectedTeam, selectedSlot) {
+    const nextRound = Number(currentMatch.dataset.nextRound);
+    const nextMatchIndex = Number(currentMatch.dataset.nextMatchIndex);
+    const nextTeamPosition = Number(currentMatch.dataset.nextTeamPosition);
+
+    if (!nextRound) {
+    const currentRound = Number(currentMatch.dataset.round);
+
+    if (currentRound === 3) {
+        document.getElementById("third-place-name").textContent = selectedTeam;
+    } else if (currentRound === 2) {
+        document.getElementById("champion-name").textContent = selectedTeam;
+    }
+
+    return;
+    }
+
+    const nextMatch = document.querySelector(
+        `.bracket-match[data-round="${nextRound}"][data-match-index="${nextMatchIndex}"]`
+    );
+
+    if (!nextMatch) {
+        return;
+    }
+
+    const nextButtons = nextMatch.querySelectorAll(".team-button");
+    const targetButton = nextButtons[nextTeamPosition];
+
+    targetButton.classList.remove("placeholder");
+    targetButton.dataset.team = selectedTeam;
+    targetButton.dataset.slot = selectedSlot;
+
+    const slotLabel = targetButton.querySelector(".slot-label");
+    const teamName = targetButton.querySelector(".team-name");
+
+    slotLabel.textContent = selectedSlot;
+    teamName.textContent = selectedTeam;
+
+    clearNextRoundSelection(nextRound, nextMatchIndex);
+    clearDownstreamRounds(Number(currentMatch.dataset.round), nextMatchIndex);
+    }
+
+    function updateThirdPlaceMatchFromSemifinal(currentMatch, selectedTeam) {
+    const currentRound = Number(currentMatch.dataset.round);
+
+    if (currentRound !== 4) {
+        return;
+    }
+
+    const semifinalIndex = Number(currentMatch.dataset.matchIndex);
+    const buttons = currentMatch.querySelectorAll(".team-button");
+
+    let loserTeam = "";
+    let loserSlot = "";
+
+    buttons.forEach((button) => {
+        if (button.dataset.team && button.dataset.team !== selectedTeam) {
+            loserTeam = button.dataset.team;
+            loserSlot = button.dataset.slot || "";
+        }
+    });
+
+    if (!loserTeam) {
+        return;
+    }
+
+    const thirdPlaceMatch = document.querySelector(
+        `.bracket-match[data-round="3"][data-match-index="0"]`
+    );
+
+    const thirdPlaceButtons = thirdPlaceMatch.querySelectorAll(".team-button");
+    const targetButton = thirdPlaceButtons[semifinalIndex];
+
+    targetButton.classList.remove("placeholder");
+    targetButton.dataset.team = loserTeam;
+    targetButton.dataset.slot = loserSlot;
+
+    const slotLabel = targetButton.querySelector(".slot-label");
+    const teamName = targetButton.querySelector(".team-name");
+
+    slotLabel.textContent = loserSlot;
+    teamName.textContent = loserTeam;
+
+    targetButton.classList.remove("selected");
+    document.getElementById("third-place-name").textContent = "TBD";
+    }
+
+    function collectKnockoutPicks() {
+        const picks = {
+            round_of_32: [],
+            round_of_16: [],
+            quarterfinals: [],
+            semifinals: [],
+            third_place_match: null,
+            final: null,
+            champion: document.getElementById("champion-name")?.textContent || "TBD",
+            third_place: document.getElementById("third-place-name")?.textContent || "TBD"
+        };
+
+        const roundNames = {
+            "32": "round_of_32",
+            "16": "round_of_16",
+            "8": "quarterfinals",
+            "4": "semifinals",
+            "3": "third_place_match",
+            "2": "final"
+        };
+
+        const matches = document.querySelectorAll(".bracket-match");
+
+        matches.forEach((match) => {
+            const round = match.dataset.round;
+            const matchIndex = Number(match.dataset.matchIndex);
+            const roundName = roundNames[round];
+
+            if (!roundName) {
+                return;
+            }
+
+            const buttons = match.querySelectorAll(".team-button");
+
+            if (buttons.length < 2) {
+                return;
+            }
+
+            const selectedButton = match.querySelector(".team-button.selected");
+
+            const matchData = {
+                match_index: matchIndex,
+                team_1: {
+                    name: buttons[0].dataset.team || "",
+                    slot: buttons[0].dataset.slot || ""
+                },
+                team_2: {
+                    name: buttons[1].dataset.team || "",
+                    slot: buttons[1].dataset.slot || ""
+                },
+                winner: selectedButton && selectedButton.dataset.team ? {
+                    name: selectedButton.dataset.team,
+                    slot: selectedButton.dataset.slot || ""
+                } : null
+            };
+
+            if (roundName === "third_place_match" || roundName === "final") {
+                picks[roundName] = matchData;
+            } else {
+                picks[roundName].push(matchData);
+            }
+        });
+
+        return picks;
+    }
+
+    function getSavedWinner(roundKey, matchIndex) {
+        if (!SAVED_KNOCKOUT_PICKS) {
+            return null;
+        }
+
+        const roundData = SAVED_KNOCKOUT_PICKS[roundKey];
+
+        if (!roundData) {
+            return null;
+        }
+
+        if (Array.isArray(roundData)) {
+            const savedMatch = roundData.find((item) => {
+                return Number(item.match_index) === Number(matchIndex);
+            });
+
+            if (savedMatch && savedMatch.winner) {
+                return savedMatch.winner;
+            }
+
+            return null;
+        }
+
+        if (
+            Number(roundData.match_index) === Number(matchIndex) &&
+            roundData.winner
+        ) {
+            return roundData.winner;
+        }
+
+        return null;
+    }
+
+
+    function clickSavedWinner(round, roundKey, matchIndex) {
+        const savedWinner = getSavedWinner(roundKey, matchIndex);
+
+        if (!savedWinner || !savedWinner.name) {
+            return;
+        }
+
+        const match = document.querySelector(
+            `.bracket-match[data-round="${round}"][data-match-index="${matchIndex}"]`
+        );
+
+        if (!match) {
+            return;
+        }
+
+        const buttons = match.querySelectorAll(".team-button");
+
+        for (const button of buttons) {
+            if (button.dataset.team === savedWinner.name) {
+                button.click();
+                return;
+            }
+        }
+
+        console.warn(
+            "Could not restore saved winner:",
+            savedWinner.name,
+            "round:",
+            round,
+            "match:",
+            matchIndex
+        );
+    }
+
+
+    function restoreSavedKnockoutPicks() {
+        if (!SAVED_KNOCKOUT_PICKS) {
+            return;
+        }
+
+        /*
+            Restore in bracket order.
+            Round of 32 must happen first because it fills Round of 16.
+            Then Round of 16 fills quarters, etc.
+        */
+
+        for (let i = 0; i < 16; i++) {
+            clickSavedWinner("32", "round_of_32", i);
+        }
+
+        for (let i = 0; i < 8; i++) {
+            clickSavedWinner("16", "round_of_16", i);
+        }
+
+        for (let i = 0; i < 4; i++) {
+            clickSavedWinner("8", "quarterfinals", i);
+        }
+
+        for (let i = 0; i < 2; i++) {
+            clickSavedWinner("4", "semifinals", i);
+        }
+
+        clickSavedWinner("3", "third_place_match", 0);
+        clickSavedWinner("2", "final", 0);
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+    restoreSavedKnockoutPicks();
+    });
+
+
+    const saveForm = document.getElementById("save-bracket-form");
+    const knockoutInput = document.getElementById("knockout-picks-input");
+
+    if (saveForm) {
+        saveForm.addEventListener("submit", function () {
+            const picks = collectKnockoutPicks();
+            knockoutInput.value = JSON.stringify(picks);
+        });
+    }
+
+    document.querySelectorAll(".bracket-wrapper").forEach((wrapper) => {
+        wrapper.addEventListener("click", function(event) {
+            const button = event.target.closest(".team-button");
+
+            if (!button) {
+                return;
+            }
+
+            if (!button.dataset.team) {
+                return;
+            }
+
+            const match = button.closest(".bracket-match");
+            const currentRound = Number(match.dataset.round);
+            const currentMatchIndex = Number(match.dataset.matchIndex);
+            const selectedTeam = button.dataset.team;
+            const selectedSlot = button.dataset.slot || "";
+
+            const buttonsInMatch = match.querySelectorAll(".team-button");
+
+            buttonsInMatch.forEach((teamButton) => {
+                teamButton.classList.remove("selected");
+            });
+
+            button.classList.add("selected");
+
+            advanceTeam(match, selectedTeam, selectedSlot);
+            updateThirdPlaceMatchFromSemifinal(match, selectedTeam);
+        });
+    });
+</script>
+</body>
+</html>
