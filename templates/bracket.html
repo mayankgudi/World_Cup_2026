@@ -6,6 +6,7 @@
 </head>
 
 <body>
+    {% include "navbar.html" %}
     <div class="page-container bracket-page">
         <header class="site-header">
             <h1>World Cup Bracket</h1>
@@ -26,6 +27,7 @@
         {% endif %}
 
         <div class="button-row">
+            <a href="{{ url_for('home') }}" class="secondary-button">Home</a>
             <a href="{{ url_for('saved_brackets') }}" class="secondary-button">My Saved Brackets</a>
             <a href="{{ url_for('logout') }}" class="danger-button">Logout</a>
         </div>
@@ -50,25 +52,41 @@
                             data-next-match-index="{{ loop.index0 // 2 }}"
                             data-next-team-position="{{ loop.index0 % 2 }}"
                         >
-                            <button
-                                type="button"
-                                class="team-button"
-                                data-team="{{ game.team_1 }}"
-                                data-slot="{{ game.slot_1 }}"
-                            >
-                                <span class="slot-label">{{ game.slot_1 }}</span>
-                                <span class="team-name">{{ game.team_1 }}</span>
-                            </button>
+                        <button
+                            type="button"
+                            class="team-button"
+                            data-team="{{ game.team_1 }}"
+                            data-slot="{{ game.slot_1 }}"
+                            data-flag="{{ game.team_1_flag }}"
+                        >
+                            <span class="slot-label">{{ game.slot_1 }}</span>
 
-                            <button
-                                type="button"
-                                class="team-button"
-                                data-team="{{ game.team_2 }}"
-                                data-slot="{{ game.slot_2 }}"
+                            <img
+                                src="{{ url_for('static', filename=game.team_1_flag) }}"
+                                alt="{{ game.team_1 }} flag"
+                                class="flag-img"
                             >
-                                <span class="slot-label">{{ game.slot_2 }}</span>
-                                <span class="team-name">{{ game.team_2 }}</span>
-                            </button>
+
+                            <span class="team-name">{{ game.team_1 }}</span>
+                        </button>
+
+                        <button
+                            type="button"
+                            class="team-button"
+                            data-team="{{ game.team_2 }}"
+                            data-slot="{{ game.slot_2 }}"
+                            data-flag="{{ game.team_2_flag }}"
+                        >
+                            <span class="slot-label">{{ game.slot_2 }}</span>
+
+                            <img
+                                src="{{ url_for('static', filename=game.team_2_flag) }}"
+                                alt="{{ game.team_2 }} flag"
+                                class="flag-img"
+                            >
+
+                            <span class="team-name">{{ game.team_2 }}</span>
+                        </button>
                         </div>
                     {% endfor %}
                 </div>
@@ -85,14 +103,26 @@
                             data-next-match-index="{{ i // 2 }}"
                             data-next-team-position="{{ i % 2 }}"
                         >
-                            <button type="button" class="team-button placeholder" data-team="">
+                            <button
+                                type="button"
+                                class="team-button placeholder"
+                                data-team=""
+                                data-slot=""
+                                data-flag=""
+                            >
                                 <span class="slot-label">TBD</span>
-                                <span class="team-name">Winner Match {{ i * 2 + 1 }}</span>
+                                <span class="team-name">TBD</span>
                             </button>
 
-                            <button type="button" class="team-button placeholder" data-team="">
+                            <button
+                                type="button"
+                                class="team-button placeholder"
+                                data-team=""
+                                data-slot=""
+                                data-flag=""
+                            >
                                 <span class="slot-label">TBD</span>
-                                <span class="team-name">Winner Match {{ i * 2 + 2 }}</span>
+                                <span class="team-name">TBD</span>
                             </button>
                         </div>
                     {% endfor %}
@@ -148,42 +178,72 @@
                     {% endfor %}
                 </div>
 
-                <div class="bracket-column final-column">
-                    <h2>Third-Place Match</h2>
+                    <div class="bracket-column final-column">
+                        <h2>Third-Place Match</h2>
 
-                    <div class="bracket-match empty-match third-place-match" data-round="3" data-match-index="0">
-                        <button type="button" class="team-button placeholder" data-team="">
-                            <span class="slot-label">TBD</span>
-                            <span class="team-name">Loser SF 1</span>
-                        </button>
+                        <div class="bracket-match empty-match third-place-match" data-round="3" data-match-index="0">
+                            <button
+                                type="button"
+                                class="team-button placeholder"
+                                data-team=""
+                                data-slot=""
+                                data-flag=""
+                            >
+                                <span class="slot-label">TBD</span>
+                                <span class="team-name">TBD</span>
+                            </button>
 
-                        <button type="button" class="team-button placeholder" data-team="">
-                            <span class="slot-label">TBD</span>
-                            <span class="team-name">Loser SF 2</span>
-                        </button>
-                    </div>
+                            <button
+                                type="button"
+                                class="team-button placeholder"
+                                data-team=""
+                                data-slot=""
+                                data-flag=""
+                            >
+                                <span class="slot-label">TBD</span>
+                                <span class="team-name">TBD</span>
+                            </button>
+                        </div>
 
-                    <div class="third-place-box">
-                        <h2>Third Place</h2>
-                        <div id="third-place-name">TBD</div>
-                    </div>
+                        <div class="third-place-box">
+                            <h2>Third Place</h2>
+                            <div id="third-place-name">TBD</div>
+                        </div>
 
-                    <h2 class="final-heading">Final</h2>
+                        <h2 class="final-heading">Final</h2>
 
-                    <div
-                        class="bracket-match empty-match final-match"
-                        data-round="2"
-                        data-match-index="0"
-                    >
-                        <button type="button" class="team-button placeholder" data-team="">
-                            <span class="slot-label">TBD</span>
-                            <span class="team-name">Winner SF 1</span>
-                        </button>
+                        <div
+                            class="bracket-match empty-match final-match"
+                            data-round="2"
+                            data-match-index="0"
+                        >
+                            <button
+                                type="button"
+                                class="team-button placeholder"
+                                data-team=""
+                                data-slot=""
+                                data-flag=""
+                            >
+                                <span class="slot-label">TBD</span>
+                                <span class="team-name">TBD</span>
+                            </button>
 
-                        <button type="button" class="team-button placeholder" data-team="">
-                            <span class="slot-label">TBD</span>
-                            <span class="team-name">Winner SF 2</span>
-                        </button>
+                            <button
+                                type="button"
+                                class="team-button placeholder"
+                                data-team=""
+                                data-slot=""
+                                data-flag=""
+                            >
+                                <span class="slot-label">TBD</span>
+                                <span class="team-name">TBD</span>
+                            </button>
+                        </div>
+
+                        <div class="champion-box">
+                            <h2>Champion</h2>
+                            <div id="champion-name">TBD</div>
+                        </div>
                     </div>
 
                     <div class="champion-box">
@@ -290,6 +350,7 @@
                     button.dataset.team = "";
                     button.dataset.slot = "";
 
+
                     const slotLabel = button.querySelector(".slot-label");
                     const teamName = button.querySelector(".team-name");
 
@@ -328,91 +389,268 @@
         });
     }
 
-    function advanceTeam(currentMatch, selectedTeam, selectedSlot) {
-    const nextRound = Number(currentMatch.dataset.nextRound);
-    const nextMatchIndex = Number(currentMatch.dataset.nextMatchIndex);
-    const nextTeamPosition = Number(currentMatch.dataset.nextTeamPosition);
+    function resetButtonToTBD(button) {
+        button.classList.add("placeholder");
+        button.classList.remove("selected");
 
-    if (!nextRound) {
-    const currentRound = Number(currentMatch.dataset.round);
+        button.dataset.team = "";
+        button.dataset.slot = "";
+        button.dataset.flag = "";
 
-    if (currentRound === 3) {
-        document.getElementById("third-place-name").textContent = selectedTeam;
-    } else if (currentRound === 2) {
-        document.getElementById("champion-name").textContent = selectedTeam;
-    }
+        const slotLabel = button.querySelector(".slot-label");
+        const flagImg = button.querySelector(".flag-img");
+        const teamName = button.querySelector(".team-name");
 
-    return;
-    }
-
-    const nextMatch = document.querySelector(
-        `.bracket-match[data-round="${nextRound}"][data-match-index="${nextMatchIndex}"]`
-    );
-
-    if (!nextMatch) {
-        return;
-    }
-
-    const nextButtons = nextMatch.querySelectorAll(".team-button");
-    const targetButton = nextButtons[nextTeamPosition];
-
-    targetButton.classList.remove("placeholder");
-    targetButton.dataset.team = selectedTeam;
-    targetButton.dataset.slot = selectedSlot;
-
-    const slotLabel = targetButton.querySelector(".slot-label");
-    const teamName = targetButton.querySelector(".team-name");
-
-    slotLabel.textContent = selectedSlot;
-    teamName.textContent = selectedTeam;
-
-    clearNextRoundSelection(nextRound, nextMatchIndex);
-    clearDownstreamRounds(Number(currentMatch.dataset.round), nextMatchIndex);
-    }
-
-    function updateThirdPlaceMatchFromSemifinal(currentMatch, selectedTeam) {
-    const currentRound = Number(currentMatch.dataset.round);
-
-    if (currentRound !== 4) {
-        return;
-    }
-
-    const semifinalIndex = Number(currentMatch.dataset.matchIndex);
-    const buttons = currentMatch.querySelectorAll(".team-button");
-
-    let loserTeam = "";
-    let loserSlot = "";
-
-    buttons.forEach((button) => {
-        if (button.dataset.team && button.dataset.team !== selectedTeam) {
-            loserTeam = button.dataset.team;
-            loserSlot = button.dataset.slot || "";
+        if (slotLabel) {
+            slotLabel.textContent = "TBD";
         }
-    });
 
-    if (!loserTeam) {
-        return;
+        if (flagImg) {
+            flagImg.remove();
+        }
+
+        if (teamName) {
+            teamName.textContent = "TBD";
+        }
     }
 
-    const thirdPlaceMatch = document.querySelector(
-        `.bracket-match[data-round="3"][data-match-index="0"]`
-    );
 
-    const thirdPlaceButtons = thirdPlaceMatch.querySelectorAll(".team-button");
-    const targetButton = thirdPlaceButtons[semifinalIndex];
+    function clearPathFromSlot(round, matchIndex, teamPosition) {
+        const match = document.querySelector(
+            `.bracket-match[data-round="${round}"][data-match-index="${matchIndex}"]`
+        );
 
-    targetButton.classList.remove("placeholder");
-    targetButton.dataset.team = loserTeam;
-    targetButton.dataset.slot = loserSlot;
+        if (!match) {
+            return;
+        }
 
-    const slotLabel = targetButton.querySelector(".slot-label");
-    const teamName = targetButton.querySelector(".team-name");
+        const buttons = match.querySelectorAll(".team-button");
+        const targetButton = buttons[teamPosition];
 
-    slotLabel.textContent = loserSlot;
-    teamName.textContent = loserTeam;
+        if (!targetButton) {
+            return;
+        }
 
-    targetButton.classList.remove("selected");
-    document.getElementById("third-place-name").textContent = "TBD";
+        const targetWasSelected = targetButton.classList.contains("selected");
+
+        resetButtonToTBD(targetButton);
+
+        /*
+            Only clear later rounds if the team being removed was actually
+            selected as the winner in this match.
+        */
+        if (!targetWasSelected) {
+            return;
+        }
+
+        buttons.forEach((button) => {
+            button.classList.remove("selected");
+        });
+
+        const currentRound = Number(match.dataset.round);
+
+        if (currentRound === 2) {
+            document.getElementById("champion-name").textContent = "TBD";
+            return;
+        }
+
+        if (currentRound === 3) {
+            document.getElementById("third-place-name").textContent = "TBD";
+            return;
+        }
+
+        const nextRound = Number(match.dataset.nextRound);
+        const nextMatchIndex = Number(match.dataset.nextMatchIndex);
+        const nextTeamPosition = Number(match.dataset.nextTeamPosition);
+
+        if (!nextRound && nextRound !== 0) {
+            return;
+        }
+
+        clearPathFromSlot(nextRound, nextMatchIndex, nextTeamPosition);
+    }
+
+
+    function clearTargetPathOnlyIfNeeded(targetMatch, targetButton) {
+        const targetWasSelected = targetButton.classList.contains("selected");
+
+        if (!targetWasSelected) {
+            return;
+        }
+
+        const buttons = targetMatch.querySelectorAll(".team-button");
+
+        buttons.forEach((button) => {
+            button.classList.remove("selected");
+        });
+
+        const targetRound = Number(targetMatch.dataset.round);
+
+        if (targetRound === 2) {
+            document.getElementById("champion-name").textContent = "TBD";
+            return;
+        }
+
+        if (targetRound === 3) {
+            document.getElementById("third-place-name").textContent = "TBD";
+            return;
+        }
+
+        const nextRound = Number(targetMatch.dataset.nextRound);
+        const nextMatchIndex = Number(targetMatch.dataset.nextMatchIndex);
+        const nextTeamPosition = Number(targetMatch.dataset.nextTeamPosition);
+
+        if (!nextRound && nextRound !== 0) {
+            return;
+        }
+
+        clearPathFromSlot(nextRound, nextMatchIndex, nextTeamPosition);
+    }
+
+
+
+    function advanceTeam(currentMatch, selectedTeam, selectedSlot, selectedFlag) {
+        const nextRound = Number(currentMatch.dataset.nextRound);
+        const nextMatchIndex = Number(currentMatch.dataset.nextMatchIndex);
+        const nextTeamPosition = Number(currentMatch.dataset.nextTeamPosition);
+
+        if (!nextRound) {
+            const currentRound = Number(currentMatch.dataset.round);
+
+            if (currentRound === 3) {
+                document.getElementById("third-place-name").textContent = selectedTeam;
+            } else if (currentRound === 2) {
+                document.getElementById("champion-name").textContent = selectedTeam;
+            }
+
+            return;
+        }
+
+        const nextMatch = document.querySelector(
+            `.bracket-match[data-round="${nextRound}"][data-match-index="${nextMatchIndex}"]`
+        );
+
+        if (!nextMatch) {
+            return;
+        }
+
+        const nextButtons = nextMatch.querySelectorAll(".team-button");
+        const targetButton = nextButtons[nextTeamPosition];
+
+        if (!targetButton) {
+            return;
+        }
+
+        /*
+            This is the important part:
+            If the old team in this exact target slot had already been picked
+            to advance later, clear only that path.
+        */
+        clearTargetPathOnlyIfNeeded(nextMatch, targetButton);
+
+        targetButton.classList.remove("placeholder");
+        targetButton.dataset.team = selectedTeam;
+        targetButton.dataset.slot = selectedSlot;
+        targetButton.dataset.flag = selectedFlag;
+
+        const slotLabel = targetButton.querySelector(".slot-label");
+        let flagImg = targetButton.querySelector(".flag-img");
+        const teamName = targetButton.querySelector(".team-name");
+
+        if (slotLabel) {
+            slotLabel.textContent = selectedSlot;
+        }
+
+        if (!flagImg) {
+            flagImg = document.createElement("img");
+            flagImg.classList.add("flag-img");
+            targetButton.insertBefore(flagImg, teamName);
+        }
+
+        flagImg.src = `/static/${selectedFlag}`;
+        flagImg.alt = `${selectedTeam} flag`;
+
+        if (teamName) {
+            teamName.textContent = selectedTeam;
+        }
+
+        updateThirdPlaceMatchFromSemifinals();
+    }
+
+    function updateThirdPlaceMatchFromSemifinals() {
+        const thirdPlaceMatch = document.querySelector(
+            `.bracket-match[data-round="3"][data-match-index="0"]`
+        );
+
+        if (!thirdPlaceMatch) {
+            return;
+        }
+
+        const thirdPlaceButtons = thirdPlaceMatch.querySelectorAll(".team-button");
+
+        const semifinalMatches = document.querySelectorAll(
+            `.bracket-match[data-round="4"]`
+        );
+
+        semifinalMatches.forEach((semifinalMatch) => {
+            const semifinalIndex = Number(semifinalMatch.dataset.matchIndex);
+            const semifinalButtons = semifinalMatch.querySelectorAll(".team-button");
+            const selectedWinner = semifinalMatch.querySelector(".team-button.selected");
+
+            const targetButton = thirdPlaceButtons[semifinalIndex];
+
+            if (!targetButton) {
+                return;
+            }
+
+            /*
+                If the semifinal is not fully decided yet,
+                clear that side of the third-place match.
+            */
+            if (!selectedWinner) {
+                resetButtonToTBD(targetButton);
+                document.getElementById("third-place-name").textContent = "TBD";
+                return;
+            }
+
+            let loserButton = null;
+
+            semifinalButtons.forEach((button) => {
+                if (
+                    button.dataset.team &&
+                    button.dataset.team !== selectedWinner.dataset.team
+                ) {
+                    loserButton = button;
+                }
+            });
+
+            if (!loserButton) {
+                resetButtonToTBD(targetButton);
+                document.getElementById("third-place-name").textContent = "TBD";
+                return;
+            }
+
+            const loserTeam = loserButton.dataset.team;
+            const loserSlot = loserButton.dataset.slot || "";
+            const loserFlag = loserButton.dataset.flag || "";
+
+            /*
+                If this third-place slot was previously selected as the winner,
+                clear the third-place winner because the matchup changed.
+            */
+            if (
+                targetButton.classList.contains("selected") &&
+                targetButton.dataset.team !== loserTeam
+            ) {
+                thirdPlaceButtons.forEach((button) => {
+                    button.classList.remove("selected");
+                });
+
+                document.getElementById("third-place-name").textContent = "TBD";
+            }
+
+            fillButtonWithTeam(targetButton, loserTeam, loserSlot, loserFlag);
+        });
     }
 
     function collectKnockoutPicks() {
@@ -459,15 +697,18 @@
                 match_index: matchIndex,
                 team_1: {
                     name: buttons[0].dataset.team || "",
-                    slot: buttons[0].dataset.slot || ""
+                    slot: buttons[0].dataset.slot || "",
+                    flag: buttons[0].dataset.flag || "wc_flags/placeholder.svg"
                 },
                 team_2: {
                     name: buttons[1].dataset.team || "",
-                    slot: buttons[1].dataset.slot || ""
+                    slot: buttons[1].dataset.slot || "",
+                    flag: buttons[1].dataset.flag || "wc_flags/placeholder.svg"
                 },
                 winner: selectedButton && selectedButton.dataset.team ? {
                     name: selectedButton.dataset.team,
-                    slot: selectedButton.dataset.slot || ""
+                    slot: selectedButton.dataset.slot || "",
+                    flag: selectedButton.dataset.flag || "wc_flags/placeholder.svg"
                 } : null
             };
 
@@ -549,6 +790,36 @@
         );
     }
 
+    function fillButtonWithTeam(button, team, slot, flag) {
+        button.classList.remove("placeholder");
+        button.dataset.team = team;
+        button.dataset.slot = slot;
+        button.dataset.flag = flag;
+
+        const slotLabel = button.querySelector(".slot-label");
+        let flagImg = button.querySelector(".flag-img");
+        const teamName = button.querySelector(".team-name");
+
+        if (slotLabel) {
+            slotLabel.textContent = slot || "TBD";
+        }
+
+        if (!flagImg) {
+            flagImg = document.createElement("img");
+            flagImg.classList.add("flag-img");
+            button.insertBefore(flagImg, teamName);
+        }
+
+        if (flag) {
+            flagImg.src = `/static/${flag}`;
+            flagImg.alt = `${team} flag`;
+        }
+
+        if (teamName) {
+            teamName.textContent = team || "TBD";
+        }
+    }
+
 
     function restoreSavedKnockoutPicks() {
         if (!SAVED_KNOCKOUT_PICKS) {
@@ -613,6 +884,7 @@
             const currentMatchIndex = Number(match.dataset.matchIndex);
             const selectedTeam = button.dataset.team;
             const selectedSlot = button.dataset.slot || "";
+            const selectedFlag = button.dataset.flag || "";
 
             const buttonsInMatch = match.querySelectorAll(".team-button");
 
@@ -622,8 +894,8 @@
 
             button.classList.add("selected");
 
-            advanceTeam(match, selectedTeam, selectedSlot);
-            updateThirdPlaceMatchFromSemifinal(match, selectedTeam);
+            advanceTeam(match, selectedTeam, selectedSlot, selectedFlag);
+            
         });
     });
 </script>

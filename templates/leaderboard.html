@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Leaderboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+    {% include "navbar.html" %}
+    <div class="page-container leaderboard-page">
+        <header class="site-header">
+            <p class="eyebrow">Scoring System</p>
+            <h1>Leaderboard</h1>
+            <p>Scores and rankings will appear here once the tournament begins.</p>
+        </header>
+
+        <section class="leaderboard-card">
+            <h2>Point Distribution</h2>
+            <p class="leaderboard-helper">
+                This is how each submitted bracket will be scored.
+            </p>
+
+            <div class="points-summary-grid">
+                <div class="points-summary-card">
+                    <h3>Group Stage</h3>
+                    <p>96 max points</p>
+                </div>
+
+                <div class="points-summary-card">
+                    <h3>Third-Place Picks</h3>
+                    <p>16 max points</p>
+                </div>
+
+                <div class="points-summary-card">
+                    <h3>Knockout Rounds</h3>
+                    <p>90 max points</p>
+                </div>
+
+                <div class="points-summary-card total-points-card">
+                    <h3>Total Possible</h3>
+                    <p>202 points</p>
+                </div>
+            </div>
+
+            <div class="points-chart">
+                <div class="points-row">
+                    <div class="points-label">
+                        Group position pick
+                        <span>2 points each</span>
+                    </div>
+
+                    <div class="points-bar-track">
+                        <div class="points-bar group-bar" style="width: 12.5%;">
+                            2
+                        </div>
+                    </div>
+                </div>
+
+                <div class="points-row">
+                    <div class="points-label">
+                        Third-place Top 8 pick
+                        <span>2 points each</span>
+                    </div>
+
+                    <div class="points-bar-track">
+                        <div class="points-bar third-place-bar" style="width: 12.5%;">
+                            2
+                        </div>
+                    </div>
+                </div>
+
+                <div class="points-row">
+                    <div class="points-label">
+                        Round of 32 winner
+                        <span>1 point each</span>
+                    </div>
+
+                    <div class="points-bar-track">
+                        <div class="points-bar knockout-bar" style="width: 6.25%;">
+                            1
+                        </div>
+                    </div>
+                </div>
+
+                <div class="points-row">
+                    <div class="points-label">
+                        Round of 16 winner
+                        <span>2 points each</span>
+                    </div>
+
+                    <div class="points-bar-track">
+                        <div class="points-bar knockout-bar" style="width: 12.5%;">
+                            2
+                        </div>
+                    </div>
+                </div>
+
+                <div class="points-row">
+                    <div class="points-label">
+                        Quarterfinal winner
+                        <span>4 points each</span>
+                    </div>
+
+                    <div class="points-bar-track">
+                        <div class="points-bar knockout-bar" style="width: 25%;">
+                            4
+                        </div>
+                    </div>
+                </div>
+
+                <div class="points-row">
+                    <div class="points-label">
+                        Semifinal winner
+                        <span>8 points each</span>
+                    </div>
+
+                    <div class="points-bar-track">
+                        <div class="points-bar knockout-bar" style="width: 50%;">
+                            8
+                        </div>
+                    </div>
+                </div>
+
+                <div class="points-row">
+                    <div class="points-label">
+                        3rd-place match winner
+                        <span>10 points</span>
+                    </div>
+
+                    <div class="points-bar-track">
+                        <div class="points-bar bronze-bar" style="width: 62.5%;">
+                            10
+                        </div>
+                    </div>
+                </div>
+
+                <div class="points-row">
+                    <div class="points-label">
+                        Final winner
+                        <span>16 points</span>
+                    </div>
+
+                    <div class="points-bar-track">
+                        <div class="points-bar final-bar" style="width: 100%;">
+                            16
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="leaderboard-card coming-soon-card">
+            <h2>Live Rankings Coming Soon</h2>
+            <p>
+                Once real match results are available, this page will rank every submitted bracket by total points.
+            </p>
+        </section>
+
+        <div class="button-row">
+            <a href="{{ url_for('home') }}" class="secondary-button">Home</a>
+            <a href="{{ url_for('saved_brackets') }}" class="main-button">View Saved Brackets</a>
+        </div>
+    </div>
+</body>
+</html>

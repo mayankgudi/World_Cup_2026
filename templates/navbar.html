@@ -1,0 +1,22 @@
+<nav class="app-navbar">
+    <div class="nav-left">
+        <a href="{{ url_for('home') }}" class="nav-brand">
+            <span class="nav-logo-box">WC</span>
+            <span>2026 Predictor</span>
+        </a>
+    </div>
+
+    <div class="nav-links">
+        <a href="{{ url_for('home') }}">Home</a>
+        <a href="{{ url_for('saved_brackets') }}">All Brackets</a>
+        <a href="{{ url_for('leaderboard') }}">Leaderboard</a>
+
+        {% if session.get("user_id") %}
+            <a href="{{ url_for('new_bracket') }}" class="nav-cta">Create Bracket</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        {% else %}
+            <a href="{{ url_for('login') }}">Login</a>
+            <a href="{{ url_for('register') }}" class="nav-cta">Register</a>
+        {% endif %}
+    </div>
+</nav>

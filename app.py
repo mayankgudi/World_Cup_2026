@@ -26,11 +26,28 @@ def login_required(route_function):
     @wraps(route_function)
     def wrapper(*args, **kwargs):
         if "user_id" not in session:
-            return redirect(url_for("login"))
+            return redirect(url_for("login", next=request.path))
 
         return route_function(*args, **kwargs)
 
     return wrapper
+
+@app.route("/")
+def home():
+    current_user = get_current_user()
+
+    user_has_bracket = False
+
+    if current_user:
+        user_has_bracket = BracketPrediction.query.filter_by(
+            user_id=current_user.id
+        ).count() >= 1
+
+    return render_template(
+        "home.html",
+        current_user=current_user,
+        user_has_bracket=user_has_bracket
+    )
 
 
 def get_current_user():
@@ -45,19 +62,107 @@ def get_current_user():
 app.secret_key = "world-cup-predictor-secret-key"
 
 GROUPS = {
-    "A": ["Czechia", "Mexico", "South Africa", "South Korea"],
-    "B": ["Bosnia & Herzegovina", "Canada", "Qatar", "Switzerland"],
-    "C": ["Brazil", "Haiti", "Morocco", "Scotland"],
-    "D": ["Australia", "Paraguay", "Turkiye", "USA"],
-    "E": ["Curacao", "Ecuador", "Germany", "Ivory Coast"],
-    "F": ["Japan", "Netherlands", "Sweden", "Tunisia"],
-    "G": ["Belgium", "Egypt", "Iran", "New Zealand"],
-    "H": ["Cape Verde", "Saudi Arabia", "Spain", "Uruguay"],
-    "I": ["France", "Iraq", "Norway", "Senegal"],
-    "J": ["Algeria", "Argentina", "Austria", "Jordan"],
-    "K": ["Colombia", "DR Congo", "Portugal", "Uzbekistan"],
-    "L": ["Croatia", "England", "Ghana", "Panama"],
+    "A": [
+        {"name": "Czechia", "flag": "wc_flags/czechia.svg"},
+        {"name": "Mexico", "flag": "wc_flags/mexico.svg"},
+        {"name": "South Africa", "flag": "wc_flags/south_africa.svg"},
+        {"name": "South Korea", "flag": "wc_flags/korea.svg"},
+    ],
+
+    "B": [
+        {"name": "Bosnia & Herzegovina", "flag": "wc_flags/bosnia.svg"},
+        {"name": "Canada", "flag": "wc_flags/canada.svg"},
+        {"name": "Qatar", "flag": "wc_flags/qatar.svg"},
+        {"name": "Switzerland", "flag": "wc_flags/swiss.svg"},
+    ],
+
+    "C": [
+        {"name": "Brazil", "flag": "wc_flags/brazil.svg"},
+        {"name": "Haiti", "flag": "wc_flags/haiti.svg"},
+        {"name": "Morocco", "flag": "wc_flags/morocco.svg"},
+        {"name": "Scotland", "flag": "wc_flags/scotland.svg"},
+    ],
+
+    "D": [
+        {"name": "Australia", "flag": "wc_flags/australia.svg"},
+        {"name": "Paraguay", "flag": "wc_flags/paraguay.svg"},
+        {"name": "Turkiye", "flag": "wc_flags/turkey.svg"},
+        {"name": "USA", "flag": "wc_flags/usa.svg"},
+    ],
+
+    "E": [
+        {"name": "Curacao", "flag": "wc_flags/curacao.svg"},
+        {"name": "Ecuador", "flag": "wc_flags/ecuador.svg"},
+        {"name": "Germany", "flag": "wc_flags/germany.svg"},
+        {"name": "Ivory Coast", "flag": "wc_flags/ivory_coast.svg"},
+    ],
+
+    "F": [
+        {"name": "Japan", "flag": "wc_flags/japan.svg"},
+        {"name": "Netherlands", "flag": "wc_flags/netherlands.svg"},
+        {"name": "Sweden", "flag": "wc_flags/sweden.svg"},
+        {"name": "Tunisia", "flag": "wc_flags/tunisia.svg"},
+    ],
+
+    "G": [
+        {"name": "Belgium", "flag": "wc_flags/belgium.svg"},
+        {"name": "Egypt", "flag": "wc_flags/egypt.svg"},
+        {"name": "Iran", "flag": "wc_flags/iran.svg"},
+        {"name": "New Zealand", "flag": "wc_flags/new_zealand.svg"},
+    ],
+
+    "H": [
+        {"name": "Cape Verde", "flag": "wc_flags/cape_verde.svg"},
+        {"name": "Saudi Arabia", "flag": "wc_flags/saudi.svg"},
+        {"name": "Spain", "flag": "wc_flags/spain.svg"},
+        {"name": "Uruguay", "flag": "wc_flags/uruguay.svg"},
+    ],
+
+    "I": [
+        {"name": "France", "flag": "wc_flags/france.svg"},
+        {"name": "Iraq", "flag": "wc_flags/iraq.svg"},
+        {"name": "Norway", "flag": "wc_flags/norway.svg"},
+        {"name": "Senegal", "flag": "wc_flags/senegal.svg"},
+    ],
+
+    "J": [
+        {"name": "Algeria", "flag": "wc_flags/algeria.svg"},
+        {"name": "Argentina", "flag": "wc_flags/argentina.svg"},
+        {"name": "Austria", "flag": "wc_flags/austria.svg"},
+        {"name": "Jordan", "flag": "wc_flags/jordan.svg"},
+    ],
+
+    "K": [
+        {"name": "Colombia", "flag": "wc_flags/colombia.svg"},
+        {"name": "DR Congo", "flag": "wc_flags/congo.svg"},
+        {"name": "Portugal", "flag": "wc_flags/portugal.svg"},
+        {"name": "Uzbekistan", "flag": "wc_flags/uzbekistan.svg"},
+    ],
+
+    "L": [
+        {"name": "Croatia", "flag": "wc_flags/croatia.svg"},
+        {"name": "England", "flag": "wc_flags/england.svg"},
+        {"name": "Ghana", "flag": "wc_flags/ghana.svg"},
+        {"name": "Panama", "flag": "wc_flags/panama.svg"},
+    ],
 }
+
+
+def get_team_flag(team_name):
+    for teams in GROUPS.values():
+        for team in teams:
+            if team["name"] == team_name:
+                return team["flag"]
+
+    return "wc_flags/usa.svg"
+
+
+def add_flags_to_bracket(bracket_games):
+    for game in bracket_games:
+        game["team_1_flag"] = get_team_flag(game["team_1"])
+        game["team_2_flag"] = get_team_flag(game["team_2"])
+
+    return bracket_games
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -95,9 +200,19 @@ def register():
         session["user_id"] = new_user.id
         session["username"] = new_user.username
 
-        return redirect(url_for("group_stage"))
+        next_page = request.args.get("next")
+
+        if next_page:
+            return redirect(next_page)
+
+        return redirect(url_for("home"))
 
     return render_template("register.html")
+
+
+@app.route("/leaderboard")
+def leaderboard():
+    return render_template("leaderboard.html")
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -120,7 +235,12 @@ def login():
         session["user_id"] = user.id
         session["username"] = user.username
 
-        return redirect(url_for("group_stage"))
+        next_page = request.args.get("next")
+
+        if next_page:
+            return redirect(next_page)
+
+        return redirect(url_for("home"))
 
     return render_template("login.html")
 
@@ -128,10 +248,10 @@ def login():
 @app.route("/logout")
 def logout():
     session.clear()
-    return redirect(url_for("login"))
+    return redirect(url_for("home"))
 
 
-@app.route("/", methods=["GET", "POST"])
+@app.route("/groups", methods=["GET", "POST"])
 @login_required
 def group_stage():
     if request.method == "POST":
@@ -166,7 +286,8 @@ def third_place():
     for group_letter, results in group_results.items():
         third_place_teams.append({
             "group": group_letter,
-            "team": results["third"]
+            "team": results["third"],
+            "flag": get_team_flag(results["third"])
         })
 
     if request.method == "POST":
@@ -204,6 +325,7 @@ def bracket():
 
     try:
         bracket_games = generate_round_of_32(group_results, third_place_ranking)
+        bracket_games = add_flags_to_bracket(bracket_games)
     except Exception as e:
         error = str(e)
 
@@ -271,11 +393,11 @@ def save_bracket():
         user_id=current_user.id
     ).count()
 
-    if bracket_count >= 3:
+    if bracket_count >= 1:
         return render_template(
             "bracket.html",
-            bracket=generate_round_of_32(group_results, third_place_ranking),
-            error="You have already submitted the maximum of 3 brackets.",
+            bracket=add_flags_to_bracket(generate_round_of_32(group_results, third_place_ranking)),
+            error="You have already submitted a bracket. You may only submit 1 bracket per account.",
             third_place_ranking=third_place_ranking,
             editing_bracket_id=None,
             saved_knockout_picks=None,
@@ -303,20 +425,29 @@ def view_bracket(prediction_id):
 
     return render_template(
         "saved_bracket.html",
-        prediction=prediction
+        prediction=prediction,
+        get_team_flag=get_team_flag
     )
 
 
 @app.route("/saved")
 @login_required
 def saved_brackets():
+    current_user = get_current_user()
+
     predictions = BracketPrediction.query.order_by(
         BracketPrediction.created_at.desc()
     ).all()
 
+    user_has_bracket = BracketPrediction.query.filter_by(
+        user_id=current_user.id
+    ).count() >= 1
+
     return render_template(
         "all_brackets.html",
-        predictions=predictions
+        predictions=predictions,
+        get_team_flag=get_team_flag,
+        user_has_bracket=user_has_bracket
     )
 
 @app.route("/delete-bracket/<int:prediction_id>", methods=["POST"])
@@ -356,16 +487,19 @@ def edit_bracket(prediction_id):
 @app.route("/new-bracket")
 @login_required
 def new_bracket():
-    user_id = session.get("user_id")
-    username = session.get("username")
+    current_user = get_current_user()
+
+    bracket_count = BracketPrediction.query.filter_by(
+        user_id=current_user.id
+    ).count()
+
+    if bracket_count >= 1:
+        return redirect(url_for("saved_brackets", error="limit_reached"))
 
     session.pop("group_results", None)
     session.pop("third_place_ranking", None)
     session.pop("knockout_picks", None)
     session.pop("editing_bracket_id", None)
-
-    session["user_id"] = user_id
-    session["username"] = username
 
     return redirect(url_for("group_stage"))
 

@@ -1,16 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <h1>World Cup 2026 Bracket Challenge</h1>
-    <p>Predict the group stage, rank third-place teams, and build your knockout bracket.</p>
+    <title>2026 World Cup Predictor - Group Stage</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 
 <body>
+    {% include "navbar.html" %}
     <div class="page-container">
         <header class="site-header">
-            <h1>2026 FIFA World Cup Predictor</h1>
-            <p>Step 1 of 3: Drag each group into your predicted final standings.</p>
+            <p class="eyebrow">2026 World Cup Bracket Challenge</p>
+            <h1>Group Stage Predictor</h1>
+            <p>Drag each group into your predicted final standings.</p>
         </header>
 
         <div class="step-bar">
@@ -19,8 +20,8 @@
             <div class="step">3. Bracket</div>
         </div>
 
-        <div class="button-row">
-            <a href="{{ url_for('saved_brackets') }}" class="secondary-button">My Saved Brackets</a>
+        <div class="button-row top-actions">
+            <a href="{{ url_for('saved_brackets') }}" class="secondary-button">Saved Brackets</a>
             <a href="{{ url_for('logout') }}" class="danger-button">Logout</a>
         </div>
 
@@ -32,11 +33,21 @@
 
                         <ol class="group-drag-list" data-group="{{ group_letter }}">
                             {% for team in teams %}
-                                <li class="group-drag-item" draggable="true" data-team="{{ team }}">
+                                <li
+                                    class="group-drag-item"
+                                    draggable="true"
+                                    data-team="{{ team.name }}"
+                                    data-flag="{{ team.flag }}"
+                                >
                                     <span class="group-rank-number"></span>
 
                                     <span class="team-info">
-                                        <strong>{{ team }}</strong>
+                                        <img
+                                            src="{{ url_for('static', filename=team.flag) }}"
+                                            alt="{{ team.name }} flag"
+                                            class="flag-img"
+                                        >
+                                        <strong>{{ team.name }}</strong>
                                     </span>
 
                                     <span class="drag-handle">☰</span>
@@ -56,8 +67,6 @@
     <script>
         const groupForm = document.getElementById("group-stage-form");
         const hiddenGroupInputs = document.getElementById("hidden-group-inputs");
-
-        let draggedItem = null;
 
         function updateGroupRankNumbers() {
             const groupLists = document.querySelectorAll(".group-drag-list");
@@ -98,9 +107,9 @@
                         offset: offset,
                         element: child
                     };
-                } else {
-                    return closest;
                 }
+
+                return closest;
             }, {
                 offset: Number.NEGATIVE_INFINITY
             }).element;
@@ -108,13 +117,11 @@
 
         document.querySelectorAll(".group-drag-item").forEach((item) => {
             item.addEventListener("dragstart", function(event) {
-                draggedItem = event.target;
                 event.target.classList.add("dragging");
             });
 
             item.addEventListener("dragend", function(event) {
                 event.target.classList.remove("dragging");
-                draggedItem = null;
                 updateGroupRankNumbers();
             });
         });
@@ -130,10 +137,6 @@
                     return;
                 }
 
-                /*
-                    This prevents dragging a team from one group into another group.
-                    It only allows reordering within the same group.
-                */
                 if (dragging.parentElement !== list) {
                     return;
                 }
@@ -154,7 +157,6 @@
             groupLists.forEach((list) => {
                 const groupLetter = list.dataset.group;
                 const teams = list.querySelectorAll(".group-drag-item");
-
                 const placeNames = ["first", "second", "third", "fourth"];
 
                 teams.forEach((teamItem, index) => {

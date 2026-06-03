@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>2026 World Cup Bracket Challenge</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+    {% include "navbar.html" %}
+
+    <div class="homepage-container">
+        <section class="official-hero-grid">
+            <div class="official-hero-copy">
+                <p class="eyebrow">2026 World Cup Bracket Challenge</p>
+
+                <h1>Predict the path to glory.</h1>
+
+                <p>
+                    Build your group stage, rank the best third-place teams,
+                    complete the knockout bracket, and compare your picks with everyone else.
+                </p>
+
+                <div class="official-hero-actions">
+                    {% if current_user %}
+                        {% if user_has_bracket %}
+                            <a href="{{ url_for('saved_brackets', error='limit_reached') }}" class="home-action-button primary-home-button">
+                                Create Bracket
+                            </a>
+                        {% else %}
+                            <a href="{{ url_for('new_bracket') }}" class="home-action-button primary-home-button">
+                                Create Bracket
+                            </a>
+                        {% endif %}
+                    {% else %}
+                        <a href="{{ url_for('login', next=url_for('new_bracket')) }}" class="home-action-button primary-home-button">
+                            Create Bracket
+                        </a>
+                    {% endif %}
+
+                    <a href="{{ url_for('saved_brackets') }}" class="home-action-button">
+                        View Brackets
+                    </a>
+                </div>
+            </div>
+
+            <div class="official-hero-panel">
+                <div class="hero-panel-title">Bracket Challenge</div>
+
+                <div class="hero-mini-groups">
+                    <div class="hero-mini-group">
+                        <span>Group Stage</span>
+                        <strong>48 teams</strong>
+                    </div>
+
+                    <div class="hero-mini-group">
+                        <span>Third-Place Race</span>
+                        <strong>Top 8 advance</strong>
+                    </div>
+
+                    <div class="hero-mini-group">
+                        <span>Knockout Bracket</span>
+                        <strong>32-team field</strong>
+                    </div>
+
+                    <div class="hero-mini-group accent">
+                        <span>Scoring</span>
+                        <strong>202 max points</strong>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
