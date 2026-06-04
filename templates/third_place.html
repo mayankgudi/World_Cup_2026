@@ -5,7 +5,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 
-<body>
+<body class="bracket-flow-bg">
     {% include "navbar.html" %}
     <div class="page-container">
         <header class="site-header">
@@ -59,7 +59,7 @@
             </div>
 
             <div class="button-row">
-                <a href="{{ url_for('group_stage') }}" class="secondary-button">Back to Groups</a>
+                <a href="{{ url_for('group_stage') }}" class="secondary-button">Back to Group Stage</a>
                 <button type="submit" class="main-button">Generate Bracket</button>
             </div>
         </form>

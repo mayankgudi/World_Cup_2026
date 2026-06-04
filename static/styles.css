@@ -2430,3 +2430,762 @@ body::before {
     color: white;
 }
 
+
+/* Fix action buttons on All Brackets cards */
+.saved-card-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin: 24px auto 0;
+    padding: 0 24px 24px;
+}
+
+.saved-card-actions a,
+.saved-card-actions button {
+    width: auto;
+    min-width: 150px;
+    max-width: 190px;
+    height: 48px;
+    margin: 0;
+    padding: 0 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.saved-card-actions form {
+    margin: 0;
+    display: inline-flex;
+}
+
+.saved-card-actions .main-button,
+.saved-card-actions .secondary-button,
+.saved-card-actions .danger-button {
+    margin: 0;
+}
+
+
+/* =========================
+   CLEANER ALL BRACKETS SUBMISSION CARDS
+========================= */
+
+.saved-list {
+    max-width: 1120px;
+    margin: 34px auto 0;
+    display: grid;
+    gap: 34px;
+}
+
+.saved-card {
+    position: relative;
+    padding: 34px 34px 28px;
+    background: #06164a;
+    border: 3px solid rgba(255, 255, 255, 0.28);
+    box-shadow: 10px 10px 0 rgba(0, 0, 0, 0.24);
+}
+
+.saved-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 8px;
+    background: linear-gradient(90deg, #ff7a00, #facc15, #16a34a);
+}
+
+.saved-card-description {
+    text-align: center;
+    padding-top: 8px;
+}
+
+.saved-card-description h2 {
+    margin: 0 0 10px;
+    font-size: 30px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: white;
+}
+
+.saved-card-description p {
+    margin: 12px 0;
+    color: white;
+}
+
+.owner-pill {
+    display: inline-block;
+    margin: 4px 0 10px;
+    padding: 7px 12px;
+    background: #16a34a;
+    color: white;
+    border: 2px solid #bbf7d0;
+    font-size: 12px;
+    font-weight: 1000;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Keep the three result cards lined up nicely */
+.all-brackets-results-row {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    gap: 28px;
+    margin: 24px auto 20px;
+    flex-wrap: wrap;
+}
+
+.all-brackets-result-mini {
+    min-width: 190px;
+    padding: 14px 16px;
+    border-width: 3px;
+    box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.18);
+}
+
+/* Cleaner action section */
+.saved-card-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin: 28px auto 0;
+    padding: 22px 20px 0;
+    border-top: 2px solid rgba(255, 255, 255, 0.18);
+}
+
+.saved-card-actions a,
+.saved-card-actions button {
+    width: auto;
+    min-width: 150px;
+    max-width: 190px;
+    height: 46px;
+    margin: 0;
+    padding: 0 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.saved-card-actions form {
+    margin: 0;
+    display: inline-flex;
+}
+
+.saved-card-actions .main-button,
+.saved-card-actions .secondary-button,
+.saved-card-actions .danger-button {
+    margin: 0;
+}
+
+/* Make Edit not stretch */
+.saved-card-actions .main-button {
+    min-width: 130px;
+    max-width: 160px;
+}
+
+/* Make Delete compact but still clear */
+.saved-card-actions .danger-button {
+    min-width: 130px;
+    max-width: 160px;
+}
+
+/* Better spacing around the bottom create button */
+.saved-list + .button-row,
+.page-container > .button-row:last-child {
+    margin-top: 42px;
+    margin-bottom: 40px;
+}
+
+/* Mobile cleanup */
+@media (max-width: 760px) {
+    .saved-card {
+        padding: 28px 18px 24px;
+    }
+
+    .saved-card-description h2 {
+        font-size: 24px;
+    }
+
+    .all-brackets-results-row {
+        gap: 14px;
+    }
+
+    .all-brackets-result-mini {
+        min-width: 100%;
+    }
+
+    .saved-card-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .saved-card-actions a,
+    .saved-card-actions button,
+    .saved-card-actions form {
+        width: 100%;
+        max-width: none;
+    }
+}
+
+.admin-banner {
+    max-width: 900px;
+    margin: 0 auto 24px;
+    padding: 14px 18px;
+    background: #facc15;
+    color: #78350f;
+    border: 3px solid #b45309;
+    text-align: center;
+    font-weight: 1000;
+    text-transform: uppercase;
+}
+
+.success-message {
+    max-width: 900px;
+    margin: 0 auto 18px;
+    background: #16a34a;
+    color: white;
+    border: 3px solid #bbf7d0;
+    padding: 14px 18px;
+    text-align: center;
+    font-weight: 1000;
+}
+
+
+/* =========================
+   2026 HOST COLORS THEME
+   Canada red / USA blue / Mexico green / white / black
+========================= */
+
+:root {
+    --wc-canada-red: #ab1919;
+    --wc-usa-blue: #18479d;
+    --wc-mexico-green: #126e43;
+    --wc-black: #050505;
+    --wc-white: #ffffff;
+
+    --wc-blue: #0057ff;
+    --wc-blue-bright: #0072ff;
+    --wc-blue-deep: #002868;
+    --wc-navy: #06164a;
+    --wc-navy-2: #071d5f;
+    --wc-card: #050505;
+    --wc-card-dark: #050505;
+    --wc-orange: #e10600;
+    --wc-gold: #facc15;
+    --wc-silver: #d1d5db;
+    --wc-bronze: #b45309;
+    --wc-green: #00843d;
+    --wc-red: #e10600;
+}
+
+/* Main background: host nation color sweep */
+body {
+    background:
+        radial-gradient(circle at 15% 15%, rgba(255, 255, 255, 0.18), transparent 24%),
+        linear-gradient(
+            135deg,
+            var(--wc-mexico-green) 0%,
+            var(--wc-mexico-green) 26%,
+            var(--wc-usa-blue) 26%,
+            var(--wc-usa-blue) 68%,
+            var(--wc-canada-red) 68%,
+            var(--wc-canada-red) 100%
+        );
+    color: var(--wc-white);
+}
+
+/* Optional subtle pattern over the background */
+body::before {
+    background:
+        linear-gradient(135deg, rgba(255,255,255,0.055) 25%, transparent 25%) -24px 0/48px 48px,
+        linear-gradient(225deg, rgba(0,0,0,0.08) 25%, transparent 25%) -24px 0/48px 48px;
+    opacity: 0.32;
+}
+
+/* Navbar */
+.app-navbar {
+    background: var(--wc-black);
+    border-bottom: 5px solid var(--wc-white);
+}
+
+.nav-logo-box {
+    background: var(--wc-white);
+    color: var(--wc-black);
+    border-color: var(--wc-canada-red);
+}
+
+.nav-links .nav-cta {
+    background: var(--wc-mexico-green);
+    border-color: var(--wc-white);
+    color: var(--wc-white);
+}
+
+.nav-links a:hover {
+    background: var(--wc-usa-blue);
+    border-color: var(--wc-white);
+}
+
+/* Header badge */
+.eyebrow {
+    background: var(--wc-black);
+    color: var(--wc-white);
+    border: 3px solid var(--wc-white);
+    box-shadow: 5px 5px 0 rgba(0,0,0,0.28);
+}
+
+/* Page headers */
+.site-header h1,
+.homepage-hero h1,
+.official-hero-copy h1 {
+    color: var(--wc-white);
+    text-shadow: 0 5px 0 rgba(0, 0, 0, 0.28);
+}
+
+.site-header h1::after {
+    background: linear-gradient(
+        90deg,
+        var(--wc-canada-red),
+        var(--wc-white),
+        var(--wc-usa-blue),
+        var(--wc-mexico-green)
+    );
+}
+
+/* Main cards */
+.group-card,
+.ranking-card,
+.save-card,
+.saved-card,
+.saved-group-card,
+.saved-match-card,
+.result-card,
+.auth-card,
+.leaderboard-card,
+.homepage-card,
+.official-hero-panel {
+    background: var(--wc-black);
+    color: var(--wc-white);
+    border: 3px solid var(--wc-white);
+    box-shadow: 10px 10px 0 rgba(0,0,0,0.35);
+}
+
+/* Step bar */
+.step {
+    background: var(--wc-black);
+    color: var(--wc-white);
+    border: 3px solid var(--wc-white);
+}
+
+.step.active {
+    background: var(--wc-usa-blue);
+    border-color: var(--wc-white);
+    color: var(--wc-white);
+}
+
+.step.completed {
+    background: var(--wc-mexico-green);
+    border-color: var(--wc-white);
+    color: var(--wc-white);
+}
+
+/* Buttons */
+.main-button,
+.primary-home-button {
+    background: var(--wc-mexico-green);
+    color: var(--wc-white);
+    border: 3px solid var(--wc-white);
+}
+
+.secondary-button,
+.home-action-button {
+    background: var(--wc-black);
+    color: var(--wc-white);
+    border: 3px solid var(--wc-white);
+}
+
+.danger-button,
+.danger-home-button {
+    background: var(--wc-canada-red);
+    color: var(--wc-white);
+    border: 3px solid var(--wc-white);
+}
+
+.main-button:hover,
+.secondary-button:hover,
+.danger-button:hover,
+.home-action-button:hover {
+    background: var(--wc-usa-blue);
+    color: var(--wc-white);
+    border-color: var(--wc-white);
+}
+
+/* Group stage placement colors */
+.group-drag-item.first-place {
+    background: var(--wc-canada-red);
+    border-color: var(--wc-white);
+    color: var(--wc-white);
+}
+
+.group-drag-item.second-place {
+    background: var(--wc-white);
+    border-color: var(--wc-black);
+    color: var(--wc-black);
+}
+
+.group-drag-item.third-place {
+    background: var(--wc-mexico-green);
+    border-color: var(--wc-white);
+    color: var(--wc-white);
+}
+
+.group-drag-item.fourth-place {
+    background: var(--wc-usa-blue);
+    border-color: var(--wc-white);
+    color: var(--wc-white);
+}
+
+.group-drag-item.first-place strong,
+.group-drag-item.third-place strong,
+.group-drag-item.fourth-place strong {
+    color: var(--wc-white);
+}
+
+.group-drag-item.second-place strong {
+    color: var(--wc-black);
+}
+
+/* Third-place ranking */
+.drag-item.qualified {
+    background: var(--wc-mexico-green);
+    border-color: var(--wc-white);
+    color: var(--wc-white);
+}
+
+.drag-item.eliminated {
+    background: var(--wc-canada-red);
+    border-color: var(--wc-white);
+    color: var(--wc-white);
+}
+
+.drag-item.qualified .rank-number {
+    background: var(--wc-black);
+    border-color: var(--wc-white);
+}
+
+.drag-item.eliminated .rank-number {
+    background: var(--wc-black);
+    border-color: var(--wc-white);
+}
+
+/* Bracket match cards */
+.bracket-match,
+.saved-live-match-card {
+    background: var(--wc-black);
+    border: 3px solid var(--wc-white);
+}
+
+.team-button,
+.saved-team-line {
+    background: var(--wc-white);
+    color: var(--wc-black);
+    border: 2px solid var(--wc-black);
+}
+
+.team-button:not(.selected):not(.placeholder),
+.saved-team-line:not(.picked-winner) {
+    background: var(--wc-black);
+    color: var(--wc-white);
+    border-color: var(--wc-white);
+}
+
+.team-button:not(.selected):not(.placeholder) .team-name,
+.saved-team-line:not(.picked-winner) span,
+.saved-team-line:not(.picked-winner) .saved-team-name {
+    color: var(--wc-white);
+}
+
+.team-button.selected,
+.saved-team-line.picked-winner {
+    background: var(--wc-mexico-green);
+    border-color: var(--wc-white);
+    color: var(--wc-white);
+}
+
+.team-button.placeholder {
+    background: rgba(255,255,255,0.12);
+    color: var(--wc-white);
+    border-color: rgba(255,255,255,0.4);
+}
+
+.slot-label {
+    background: var(--wc-usa-blue);
+    color: var(--wc-white);
+    border: 2px solid var(--wc-white);
+}
+
+/* Bracket connector lines */
+.bracket-match::after,
+.saved-live-match-card::after {
+    background: var(--wc-white);
+}
+
+/* Result boxes */
+.champion-box,
+.champion-result,
+.champion-mini {
+    background: var(--wc-canada-red);
+    border-color: var(--wc-white);
+    color: var(--wc-white);
+}
+
+.runner-up-result,
+.runner-up-mini {
+    background: var(--wc-white);
+    border-color: var(--wc-black);
+    color: var(--wc-black);
+}
+
+.third-place-box,
+.third-result,
+.third-place-mini {
+    background: var(--wc-mexico-green);
+    border-color: var(--wc-white);
+    color: var(--wc-white);
+}
+
+.champion-result h2,
+.third-result h2,
+.champion-mini,
+.third-place-mini {
+    color: var(--wc-white);
+}
+
+.runner-up-result h2,
+.runner-up-mini {
+    color: var(--wc-black);
+}
+
+/* All brackets cards */
+.saved-card::before {
+    background: linear-gradient(
+        90deg,
+        var(--wc-canada-red),
+        var(--wc-white),
+        var(--wc-usa-blue),
+        var(--wc-mexico-green)
+    );
+}
+
+.all-brackets-result-mini {
+    border-width: 3px;
+}
+
+/* Leaderboard point chart */
+.points-summary-card {
+    background: var(--wc-usa-blue);
+    border-color: var(--wc-white);
+    color: var(--wc-white);
+}
+
+.points-summary-card h3,
+.points-summary-card p {
+    color: var(--wc-white);
+}
+
+.total-points-card {
+    background: var(--wc-mexico-green);
+    border-color: var(--wc-white);
+}
+
+.points-bar-track {
+    background: var(--wc-white);
+    border-color: var(--wc-black);
+}
+
+.group-bar {
+    background: var(--wc-usa-blue);
+}
+
+.third-place-bar {
+    background: var(--wc-mexico-green);
+}
+
+.knockout-bar {
+    background: var(--wc-black);
+}
+
+.bronze-bar {
+    background: var(--wc-canada-red);
+}
+
+.final-bar {
+    background: var(--wc-mexico-green);
+    color: var(--wc-white);
+}
+
+/* Form fields */
+.auth-card input,
+.save-card input[type="text"] {
+    background: var(--wc-white);
+    color: var(--wc-black);
+    border: 3px solid var(--wc-black);
+}
+
+/* Admin / error / success messages */
+.error {
+    background: var(--wc-canada-red);
+    color: var(--wc-white);
+    border-color: var(--wc-white);
+}
+
+.success-message,
+.admin-banner {
+    background: var(--wc-mexico-green);
+    color: var(--wc-white);
+    border-color: var(--wc-white);
+}
+
+/* =========================
+   KEEP PODIUM COLORS
+   Champion gold / Runner-up silver / Third bronze
+========================= */
+
+.champion-box,
+.champion-result,
+.champion-mini {
+    background: #facc15;
+    border-color: #b45309;
+    color: #78350f;
+}
+
+.champion-box h2,
+.champion-result h2,
+.champion-mini,
+.champion-mini .mini-result-label,
+.champion-mini strong {
+    color: #78350f;
+}
+
+.runner-up-result,
+.runner-up-mini {
+    background: #d1d5db;
+    border-color: #6b7280;
+    color: #111827;
+}
+
+.runner-up-result h2,
+.runner-up-mini,
+.runner-up-mini .mini-result-label,
+.runner-up-mini strong {
+    color: #111827;
+}
+
+.third-place-box,
+.third-result,
+.third-place-mini {
+    background: #b45309;
+    border-color: #78350f;
+    color: #ffffff;
+}
+
+.third-place-box h2,
+.third-result h2,
+.third-place-mini,
+.third-place-mini .mini-result-label,
+.third-place-mini strong {
+    color: #ffffff;
+}
+
+/* View Bracket top summary boxes */
+.saved-top-summary .champion-result {
+    background: #facc15;
+    border-color: #b45309;
+    color: #78350f;
+}
+
+.saved-top-summary .runner-up-result {
+    background: #d1d5db;
+    border-color: #6b7280;
+    color: #111827;
+}
+
+.saved-top-summary .third-result {
+    background: #b45309;
+    border-color: #78350f;
+    color: #ffffff;
+}
+
+/* Final / third-place result strips on saved bracket view */
+.saved-championship-card .saved-final-result {
+    background: #facc15;
+    border-color: #b45309;
+    color: #78350f;
+}
+
+.saved-third-place-card .saved-final-result {
+    background: #b45309;
+    border-color: #78350f;
+    color: #ffffff;
+}
+
+
+/* Make saved bracket final section headings white */
+.saved-final-card h3,
+.saved-third-place-card h3,
+.saved-championship-card h3 {
+    color: white;
+}
+
+/* Make leaderboard scoring chart text white */
+.leaderboard-page,
+.leaderboard-page p,
+.leaderboard-page h1,
+.leaderboard-page h2,
+.leaderboard-page h3,
+.leaderboard-page span,
+.leaderboard-page strong,
+.leaderboard-helper,
+.points-label,
+.points-label span {
+    color: white;
+}
+
+/* =========================
+   LEADERBOARD BAR COLORS
+========================= */
+
+/* Group Stage = green */
+.group-bar {
+    background: #00843d;
+    color: white;
+}
+
+/* Third-place race = red */
+.third-place-bar {
+    background: #e10600;
+    color: white;
+}
+
+/* Knockout rounds = blue */
+.knockout-bar {
+    background: #0057ff;
+    color: white;
+}
+
+/* 3rd-place match = bronze */
+.bronze-bar {
+    background: #b45309;
+    color: white;
+}
+
+/* Final match = gold */
+.final-bar {
+    background: #facc15;
+    color: #111827;
+}
+

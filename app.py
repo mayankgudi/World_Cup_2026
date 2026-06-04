@@ -6,6 +6,8 @@ from worldcup_logic import generate_round_of_32
 from models import db, BracketPrediction, User
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
+from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
+from werkzeug.security import generate_password_hash
 
 load_dotenv()
 
@@ -57,6 +59,14 @@ def get_current_user():
         return None
 
     return User.query.get(user_id)
+
+def current_user_is_admin():
+    current_user = get_current_user()
+
+    if not current_user:
+        return False
+
+    return bool(current_user.is_admin)
 
 # Needed so Flask can use session storage.
 app.secret_key = "world-cup-predictor-secret-key"
@@ -157,6 +167,75 @@ def get_team_flag(team_name):
     return "wc_flags/usa.svg"
 
 
+def get_team_object(team_name):
+    for teams in GROUPS.values():
+        for team in teams:
+            if team["name"] == team_name:
+                return team
+
+    return {
+        "name": team_name,
+        "flag": "wc_flags/placeholder.svg"
+    }
+
+
+def get_ordered_groups_for_display():
+    saved_group_results = session.get("group_results")
+
+    if not saved_group_results:
+        return GROUPS
+
+    ordered_groups = {}
+
+    for group_letter, teams in GROUPS.items():
+        saved_group = saved_group_results.get(group_letter)
+
+        if not saved_group:
+            ordered_groups[group_letter] = teams
+            continue
+
+        ordered_team_names = [
+            saved_group.get("first"),
+            saved_group.get("second"),
+            saved_group.get("third"),
+            saved_group.get("fourth"),
+        ]
+
+        ordered_groups[group_letter] = [
+            get_team_object(team_name)
+            for team_name in ordered_team_names
+            if team_name
+        ]
+
+    return ordered_groups
+
+
+def get_password_reset_serializer():
+    return URLSafeTimedSerializer(app.secret_key)
+
+
+def generate_password_reset_token(email):
+    serializer = get_password_reset_serializer()
+    return serializer.dumps(email, salt="password-reset-salt")
+
+
+def verify_password_reset_token(token, expiration_seconds=1800):
+    serializer = get_password_reset_serializer()
+
+    try:
+        email = serializer.loads(
+            token,
+            salt="password-reset-salt",
+            max_age=expiration_seconds
+        )
+        return email
+    except SignatureExpired:
+        return None
+    except BadSignature:
+        return None
+
+
+
 def add_flags_to_bracket(bracket_games):
     for game in bracket_games:
         game["team_1_flag"] = get_team_flag(game["team_1"])
@@ -215,6 +294,8 @@ def leaderboard():
     return render_template("leaderboard.html")
 
 
+
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -251,26 +332,156 @@ def logout():
     return redirect(url_for("home"))
 
 
+@app.route("/forgot-password", methods=["GET", "POST"])
+def forgot_password():
+    message = None
+
+    if request.method == "POST":
+        email = request.form["email"].strip().lower()
+
+        user = User.query.filter_by(email=email).first()
+
+        # Always show the same message so people cannot guess valid emails.
+        message = "If an account exists with that email, a password reset link has been sent."
+
+        if user:
+            token = generate_password_reset_token(user.email)
+
+            reset_link = url_for(
+                "reset_password",
+                token=token,
+                _external=True
+            )
+
+            # DEVELOPMENT VERSION:
+            # Print reset link to terminal for now.
+            print("Password reset link:", reset_link)
+
+            # Later, replace this print with real email sending.
+
+    return render_template(
+        "forgot_password.html",
+        message=message
+    )
+
+
+@app.route("/reset-password/<token>", methods=["GET", "POST"])
+def reset_password(token):
+    email = verify_password_reset_token(token)
+
+    if not email:
+        return render_template(
+            "reset_password.html",
+            error="This password reset link is invalid or has expired.",
+            token=None
+        )
+
+    user = User.query.filter_by(email=email).first()
+
+    if not user:
+        return render_template(
+            "reset_password.html",
+            error="This password reset link is invalid.",
+            token=None
+        )
+
+    if request.method == "POST":
+        new_password = request.form["password"]
+        confirm_password = request.form["confirm_password"]
+
+        if not new_password or not confirm_password:
+            return render_template(
+                "reset_password.html",
+                error="Both password fields are required.",
+                token=token
+            )
+
+        if new_password != confirm_password:
+            return render_template(
+                "reset_password.html",
+                error="Passwords do not match.",
+                token=token
+            )
+
+        user.password_hash = generate_password_hash(new_password)
+        db.session.commit()
+
+        return redirect(url_for("login", reset_success="1"))
+
+    return render_template(
+        "reset_password.html",
+        token=token
+    )
+
+
 @app.route("/groups", methods=["GET", "POST"])
 @login_required
 def group_stage():
     if request.method == "POST":
         group_results = {}
 
-        for group_letter in GROUPS:
-            group_results[group_letter] = {
-                "first": request.form[f"{group_letter}_first"],
-                "second": request.form[f"{group_letter}_second"],
-                "third": request.form[f"{group_letter}_third"],
-                "fourth": request.form[f"{group_letter}_fourth"],
-            }
+        try:
+            for group_letter in GROUPS:
+                group_results[group_letter] = {
+                    "first": request.form[f"{group_letter}_first"],
+                    "second": request.form[f"{group_letter}_second"],
+                    "third": request.form[f"{group_letter}_third"],
+                    "fourth": request.form[f"{group_letter}_fourth"],
+                }
 
-        # Save group results so the next page can use them.
-        session["group_results"] = group_results
+            session["group_results"] = group_results
 
-        return redirect(url_for("third_place"))
+            return redirect(url_for("third_place"))
 
-    return render_template("group_stage.html", groups=GROUPS)
+        except KeyError:
+            return render_template(
+                "group_stage.html",
+                groups=get_ordered_groups_for_display(),
+                error="Please rank every team in every group.",
+                editing_bracket_id=session.get("editing_bracket_id")
+            )
+
+    return render_template(
+        "group_stage.html",
+        groups=get_ordered_groups_for_display(),
+        editing_bracket_id=session.get("editing_bracket_id")
+    )
+
+
+def get_third_place_teams_for_display():
+    group_results = session.get("group_results")
+    saved_ranking = session.get("third_place_ranking")
+
+    if not group_results:
+        return []
+
+    third_place_teams_by_group = {}
+
+    for group_letter, results in group_results.items():
+        third_place_team = results["third"]
+
+        third_place_teams_by_group[group_letter] = {
+            "group": group_letter,
+            "team": third_place_team,
+            "flag": get_team_flag(third_place_team)
+        }
+
+    if not saved_ranking:
+        return list(third_place_teams_by_group.values())
+
+    ordered_third_place_teams = []
+
+    for group_letter in saved_ranking:
+        if group_letter in third_place_teams_by_group:
+            ordered_third_place_teams.append(
+                third_place_teams_by_group[group_letter]
+            )
+
+    for group_letter, item in third_place_teams_by_group.items():
+        if group_letter not in saved_ranking:
+            ordered_third_place_teams.append(item)
+
+    return ordered_third_place_teams
 
 
 @app.route("/third-place", methods=["GET", "POST"])
@@ -281,21 +492,11 @@ def third_place():
     if not group_results:
         return redirect(url_for("group_stage"))
 
-    third_place_teams = []
-
-    for group_letter, results in group_results.items():
-        third_place_teams.append({
-            "group": group_letter,
-            "team": results["third"],
-            "flag": get_team_flag(results["third"])
-        })
-
     if request.method == "POST":
         third_place_ranking = []
 
-        for rank_number in range(1, 13):
-            group_letter = request.form[f"rank_{rank_number}"]
-            third_place_ranking.append(group_letter)
+        for i in range(1, 13):
+            third_place_ranking.append(request.form[f"rank_{i}"])
 
         session["third_place_ranking"] = third_place_ranking
 
@@ -303,7 +504,8 @@ def third_place():
 
     return render_template(
         "third_place.html",
-        third_place_teams=third_place_teams
+        third_place_teams=get_third_place_teams_for_display(),
+        editing_bracket_id=session.get("editing_bracket_id")
     )
 
 
@@ -447,7 +649,8 @@ def saved_brackets():
         "all_brackets.html",
         predictions=predictions,
         get_team_flag=get_team_flag,
-        user_has_bracket=user_has_bracket
+        user_has_bracket=user_has_bracket,
+        current_user_is_admin=current_user.is_admin
     )
 
 @app.route("/delete-bracket/<int:prediction_id>", methods=["POST"])
@@ -457,7 +660,10 @@ def delete_bracket(prediction_id):
 
     prediction = BracketPrediction.query.get_or_404(prediction_id)
 
-    if prediction.user_id != current_user.id:
+    user_owns_bracket = prediction.user_id == current_user.id
+    user_is_admin = current_user.is_admin
+
+    if not user_owns_bracket and not user_is_admin:
         return redirect(url_for("saved_brackets"))
 
     db.session.delete(prediction)

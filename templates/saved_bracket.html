@@ -5,7 +5,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 
-<body>
+<body class="bracket-flow-bg">
     {% include "navbar.html" %}
     <div class="page-container saved-bracket-page">
         <header class="site-header">
@@ -392,16 +392,19 @@
         </section>
 
         <div class="button-row">
-            <a href="{{ url_for('saved_brackets') }}" class="secondary-button">Back to Saved Brackets</a>
+            
             <a href="{{ url_for('home') }}" class="secondary-button">Home</a>
 
             {% if prediction.user_id == session["user_id"] %}
+            
                 <a href="{{ url_for('edit_bracket', prediction_id=prediction.id) }}" class="main-button">
                     Edit This Bracket
                 </a>
             {% endif %}
 
-            <a href="{{ url_for('new_bracket') }}" class="secondary-button">Create New Bracket</a>
+            <a href="{{ url_for('saved_brackets') }}" class="secondary-button">Back to Saved Brackets</a>
+
+            
         </div>
     </div>
 </body>
