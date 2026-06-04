@@ -3060,7 +3060,7 @@ body::before {
 .champion-mini {
     background: #facc15;
     border-color: #b45309;
-    color: #78350f;
+    color: #ffffff;
 }
 
 .champion-box h2,
@@ -3068,7 +3068,7 @@ body::before {
 .champion-mini,
 .champion-mini .mini-result-label,
 .champion-mini strong {
-    color: #78350f;
+    color: #ffffff;
 }
 
 .runner-up-result,
@@ -3105,7 +3105,7 @@ body::before {
 .saved-top-summary .champion-result {
     background: #facc15;
     border-color: #b45309;
-    color: #78350f;
+    color: #ffffff;
 }
 
 .saved-top-summary .runner-up-result {
@@ -3124,7 +3124,7 @@ body::before {
 .saved-championship-card .saved-final-result {
     background: #facc15;
     border-color: #b45309;
-    color: #78350f;
+    color: #ffffff;
 }
 
 .saved-third-place-card .saved-final-result {
