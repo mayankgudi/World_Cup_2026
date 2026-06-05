@@ -5,172 +5,361 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 
-<body class="bracket-flow-bg">
+<body>
     {% include "navbar.html" %}
+
     <div class="page-container">
         <header class="site-header">
             <p class="eyebrow">2026 World Cup Bracket Challenge</p>
-            <h1>Group Stage Predictor</h1>
-            <p>Drag each group into your predicted final standings.</p>
+            <h1>Group Stage</h1>
+            <p>Tap each team in the order you think they will finish: 1st, 2nd, 3rd, then 4th.</p>
         </header>
 
         <div class="step-bar">
             <div class="step active">1. Group Stage</div>
-            <div class="step">2. Third-Place Ranking</div>
+            <div class="step">2. Third-Place Picks</div>
             <div class="step">3. Bracket</div>
         </div>
 
-        <div class="button-row top-actions">
-            <a href="{{ url_for('saved_brackets') }}" class="secondary-button">Saved Brackets</a>
-            <a href="{{ url_for('logout') }}" class="danger-button">Logout</a>
-        </div>
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
 
         <form method="POST" id="group-stage-form">
-            <div class="groups-container">
+            <div class="groups-container click-rank-groups">
                 {% for group_letter, teams in groups.items() %}
-                    <div class="group-card">
-                        <h2>Group {{ group_letter }}</h2>
+                    {% set saved_group = saved_group_results[group_letter] if saved_group_results and group_letter in saved_group_results else None %}
 
-                        <ol class="group-drag-list" data-group="{{ group_letter }}">
+                    <div class="group-card click-rank-card" data-group="{{ group_letter }}">
+                        <!-- <div class="group-card-header">
+                            <h2>Group {{ group_letter }}</h2>
+                            <span class="group-instruction">Tap 1st → 4th</span>
+                        </div> -->
+
+                        <div class="team-choice-grid">
                             {% for team in teams %}
-                                <li
-                                    class="group-drag-item"
-                                    draggable="true"
+                                {% set saved_rank = "" %}
+
+                                {% if saved_group %}
+                                    {% if saved_group.first == team.name %}
+                                        {% set saved_rank = "first" %}
+                                    {% elif saved_group.second == team.name %}
+                                        {% set saved_rank = "second" %}
+                                    {% elif saved_group.third == team.name %}
+                                        {% set saved_rank = "third" %}
+                                    {% elif saved_group.fourth == team.name %}
+                                        {% set saved_rank = "fourth" %}
+                                    {% endif %}
+                                {% endif %}
+
+                                <button
+                                    type="button"
+                                    class="team-choice {% if saved_rank %}team-choice-selected{% endif %}"
                                     data-team="{{ team.name }}"
                                     data-flag="{{ team.flag }}"
+                                    data-code="{{ get_team_code(team.name) }}"
+                                    data-rank="{{ saved_rank }}"
                                 >
-                                    <span class="group-rank-number"></span>
-
-                                    <span class="team-info">
-                                        <img
-                                            src="{{ url_for('static', filename=team.flag) }}"
-                                            alt="{{ team.name }} flag"
-                                            class="flag-img"
-                                        >
-                                        <strong>{{ team.name }}</strong>
+                                    <span class="team-choice-rank">
+                                        {% if saved_rank == "first" %}1{% elif saved_rank == "second" %}2{% elif saved_rank == "third" %}3{% elif saved_rank == "fourth" %}4{% endif %}
                                     </span>
 
-                                    <span class="drag-handle">☰</span>
-                                </li>
+                                    <img
+                                        src="{{ url_for('static', filename=team.flag) }}"
+                                        alt="{{ team.name }} flag"
+                                        class="flag-img"
+                                    >
+
+                                    <span class="team-choice-code">{{ get_team_code(team.name) }}</span>
+                                    <span class="team-choice-name">{{ team.name }}</span>
+                                </button>
                             {% endfor %}
-                        </ol>
+                        </div>
+
+                        <div class="ranked-slots">
+                            {% set positions = [
+                                ("first", "1", "1st"),
+                                ("second", "2", "2nd"),
+                                ("third", "3", "3rd"),
+                                ("fourth", "4", "4th")
+                            ] %}
+
+                            {% for position_key, position_number, position_label in positions %}
+                                {% set saved_team_name = saved_group[position_key] if saved_group else "" %}
+                                {% set saved_flag = get_team_flag(saved_team_name) if saved_team_name else "" %}
+
+                                <div
+                                    class="rank-slot rank-{{ position_key }}"
+                                    data-position="{{ position_key }}"
+                                    data-team="{{ saved_team_name }}"
+                                    data-flag="{{ saved_flag }}"
+                                >
+                                    <span class="rank-number">{{ position_number }}</span>
+
+                                    <div class="rank-slot-team">
+                                        {% if saved_team_name %}
+                                            <img
+                                                src="{{ url_for('static', filename=saved_flag) }}"
+                                                alt="{{ saved_team_name }} flag"
+                                                class="flag-img"
+                                            >
+                                            <span>{{ saved_team_name }}</span>
+                                        {% else %}
+                                            <span class="rank-placeholder">{{ position_label }} place</span>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="rank-controls">
+                                        <button type="button" class="rank-move-button move-up" title="Move up">▲</button>
+                                        <button type="button" class="rank-move-button move-down" title="Move down">▼</button>
+                                        <button type="button" class="rank-remove-button" title="Remove">×</button>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
                     </div>
                 {% endfor %}
             </div>
 
             <div id="hidden-group-inputs"></div>
 
-            <button type="submit" class="main-button">Continue to Third-Place Ranking</button>
+            <button type="submit" class="main-button">
+                Continue to Third-Place Picks
+            </button>
         </form>
     </div>
 
     <script>
+        const rankOrder = ["first", "second", "third", "fourth"];
+        const rankLabels = {
+            first: "1st place",
+            second: "2nd place",
+            third: "3rd place",
+            fourth: "4th place"
+        };
+        const rankNumbers = {
+            first: "1",
+            second: "2",
+            third: "3",
+            fourth: "4"
+        };
+
         const groupForm = document.getElementById("group-stage-form");
         const hiddenGroupInputs = document.getElementById("hidden-group-inputs");
 
-        function updateGroupRankNumbers() {
-            const groupLists = document.querySelectorAll(".group-drag-list");
-
-            groupLists.forEach((list) => {
-                const items = list.querySelectorAll(".group-drag-item");
-
-                items.forEach((item, index) => {
-                    const rankNumber = item.querySelector(".group-rank-number");
-                    rankNumber.textContent = index + 1;
-
-                    item.classList.remove("first-place", "second-place", "third-place", "fourth-place");
-
-                    if (index === 0) {
-                        item.classList.add("first-place");
-                    } else if (index === 1) {
-                        item.classList.add("second-place");
-                    } else if (index === 2) {
-                        item.classList.add("third-place");
-                    } else {
-                        item.classList.add("fourth-place");
-                    }
-                });
-            });
+        function getGroupCard(element) {
+            return element.closest(".click-rank-card");
         }
 
-        function getDragAfterElement(container, y, itemSelector) {
-            const draggableElements = [
-                ...container.querySelectorAll(`${itemSelector}:not(.dragging)`)
-            ];
-
-            return draggableElements.reduce((closest, child) => {
-                const box = child.getBoundingClientRect();
-                const offset = y - box.top - box.height / 2;
-
-                if (offset < 0 && offset > closest.offset) {
-                    return {
-                        offset: offset,
-                        element: child
-                    };
-                }
-
-                return closest;
-            }, {
-                offset: Number.NEGATIVE_INFINITY
-            }).element;
+        function getSlots(groupCard) {
+            return Array.from(groupCard.querySelectorAll(".rank-slot"));
         }
 
-        document.querySelectorAll(".group-drag-item").forEach((item) => {
-            item.addEventListener("dragstart", function(event) {
-                event.target.classList.add("dragging");
+        function getChoices(groupCard) {
+            return Array.from(groupCard.querySelectorAll(".team-choice"));
+        }
+
+        function findNextOpenSlot(groupCard) {
+            return getSlots(groupCard).find((slot) => !slot.dataset.team);
+        }
+
+        function setSlot(slot, teamName, teamFlag) {
+            slot.dataset.team = teamName;
+            slot.dataset.flag = teamFlag;
+
+            const display = slot.querySelector(".rank-slot-team");
+            display.innerHTML = "";
+
+            const flagImg = document.createElement("img");
+            flagImg.src = `/static/${teamFlag}`;
+            flagImg.alt = `${teamName} flag`;
+            flagImg.classList.add("flag-img");
+
+            const nameSpan = document.createElement("span");
+            nameSpan.textContent = teamName;
+
+            display.appendChild(flagImg);
+            display.appendChild(nameSpan);
+        }
+
+        function clearSlot(slot) {
+            const position = slot.dataset.position;
+
+            slot.dataset.team = "";
+            slot.dataset.flag = "";
+
+            const display = slot.querySelector(".rank-slot-team");
+            display.innerHTML = `<span class="rank-placeholder">${rankLabels[position]}</span>`;
+        }
+
+        function syncChoices(groupCard) {
+            const slots = getSlots(groupCard);
+            const choices = getChoices(groupCard);
+
+            choices.forEach((choice) => {
+                choice.classList.remove("team-choice-selected");
+                choice.dataset.rank = "";
+                choice.querySelector(".team-choice-rank").textContent = "";
             });
 
-            item.addEventListener("dragend", function(event) {
-                event.target.classList.remove("dragging");
-                updateGroupRankNumbers();
-            });
-        });
-
-        document.querySelectorAll(".group-drag-list").forEach((list) => {
-            list.addEventListener("dragover", function(event) {
-                event.preventDefault();
-
-                const afterElement = getDragAfterElement(list, event.clientY, ".group-drag-item");
-                const dragging = document.querySelector(".group-drag-item.dragging");
-
-                if (!dragging) {
+            slots.forEach((slot) => {
+                if (!slot.dataset.team) {
                     return;
                 }
 
-                if (dragging.parentElement !== list) {
+                const choice = choices.find((item) => item.dataset.team === slot.dataset.team);
+
+                if (!choice) {
                     return;
                 }
 
-                if (afterElement == null) {
-                    list.appendChild(dragging);
-                } else {
-                    list.insertBefore(dragging, afterElement);
+                choice.classList.add("team-choice-selected");
+                choice.dataset.rank = slot.dataset.position;
+                choice.querySelector(".team-choice-rank").textContent = rankNumbers[slot.dataset.position];
+            });
+        }
+
+        function compactGroupSlots(groupCard) {
+            const slots = getSlots(groupCard);
+            const teams = slots
+                .filter((slot) => slot.dataset.team)
+                .map((slot) => ({
+                    team: slot.dataset.team,
+                    flag: slot.dataset.flag
+                }));
+
+            slots.forEach(clearSlot);
+
+            teams.forEach((item, index) => {
+                setSlot(slots[index], item.team, item.flag);
+            });
+
+            syncChoices(groupCard);
+        }
+
+        function removeTeamFromGroup(groupCard, teamName) {
+            const slot = getSlots(groupCard).find((item) => item.dataset.team === teamName);
+
+            if (slot) {
+                clearSlot(slot);
+                compactGroupSlots(groupCard);
+            }
+        }
+
+        function swapSlots(slotA, slotB) {
+            const teamA = slotA.dataset.team;
+            const flagA = slotA.dataset.flag;
+            const teamB = slotB.dataset.team;
+            const flagB = slotB.dataset.flag;
+
+            if (teamB) {
+                setSlot(slotA, teamB, flagB);
+            } else {
+                clearSlot(slotA);
+            }
+
+            if (teamA) {
+                setSlot(slotB, teamA, flagA);
+            } else {
+                clearSlot(slotB);
+            }
+
+            syncChoices(getGroupCard(slotA));
+        }
+
+        document.querySelectorAll(".team-choice").forEach((choice) => {
+            choice.addEventListener("click", function() {
+                const groupCard = getGroupCard(choice);
+                const teamName = choice.dataset.team;
+                const teamFlag = choice.dataset.flag;
+
+                if (choice.classList.contains("team-choice-selected")) {
+                    removeTeamFromGroup(groupCard, teamName);
+                    return;
                 }
+
+                const nextSlot = findNextOpenSlot(groupCard);
+
+                if (!nextSlot) {
+                    alert("This group is already full. Remove or move a team first.");
+                    return;
+                }
+
+                setSlot(nextSlot, teamName, teamFlag);
+                syncChoices(groupCard);
             });
         });
 
-        groupForm.addEventListener("submit", function() {
+        document.querySelectorAll(".rank-remove-button").forEach((button) => {
+            button.addEventListener("click", function() {
+                const groupCard = getGroupCard(button);
+                const slot = button.closest(".rank-slot");
+
+                clearSlot(slot);
+                compactGroupSlots(groupCard);
+            });
+        });
+
+        document.querySelectorAll(".move-up").forEach((button) => {
+            button.addEventListener("click", function() {
+                const slot = button.closest(".rank-slot");
+                const groupCard = getGroupCard(slot);
+                const slots = getSlots(groupCard);
+                const currentIndex = slots.indexOf(slot);
+
+                if (currentIndex <= 0) {
+                    return;
+                }
+
+                swapSlots(slot, slots[currentIndex - 1]);
+            });
+        });
+
+        document.querySelectorAll(".move-down").forEach((button) => {
+            button.addEventListener("click", function() {
+                const slot = button.closest(".rank-slot");
+                const groupCard = getGroupCard(slot);
+                const slots = getSlots(groupCard);
+                const currentIndex = slots.indexOf(slot);
+
+                if (currentIndex >= slots.length - 1) {
+                    return;
+                }
+
+                swapSlots(slot, slots[currentIndex + 1]);
+            });
+        });
+
+        groupForm.addEventListener("submit", function(event) {
             hiddenGroupInputs.innerHTML = "";
 
-            const groupLists = document.querySelectorAll(".group-drag-list");
+            let allFilled = true;
 
-            groupLists.forEach((list) => {
-                const groupLetter = list.dataset.group;
-                const teams = list.querySelectorAll(".group-drag-item");
-                const placeNames = ["first", "second", "third", "fourth"];
+            document.querySelectorAll(".click-rank-card").forEach((groupCard) => {
+                const groupLetter = groupCard.dataset.group;
+                const slots = getSlots(groupCard);
 
-                teams.forEach((teamItem, index) => {
+                slots.forEach((slot) => {
+                    if (!slot.dataset.team) {
+                        allFilled = false;
+                    }
+
                     const input = document.createElement("input");
                     input.type = "hidden";
-                    input.name = `${groupLetter}_${placeNames[index]}`;
-                    input.value = teamItem.dataset.team;
+                    input.name = `${groupLetter}_${slot.dataset.position}`;
+                    input.value = slot.dataset.team;
 
                     hiddenGroupInputs.appendChild(input);
                 });
             });
+
+            if (!allFilled) {
+                event.preventDefault();
+                alert("Please select all 4 positions for every group.");
+            }
         });
 
-        updateGroupRankNumbers();
+        document.querySelectorAll(".click-rank-card").forEach(syncChoices);
     </script>
 </body>
 </html>

@@ -1,156 +1,168 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>2026 World Cup Predictor - Third Place</title>
+    <title>2026 World Cup Predictor - Third-Place Picks</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 
-<body class="bracket-flow-bg">
+<body>
     {% include "navbar.html" %}
+
     <div class="page-container">
         <header class="site-header">
-            <p class="eyebrow">Best Third-Place Teams</p>
-            <h1>Rank Third-Place Teams</h1>
-            <p>Drag the teams into order. The top 8 qualify for the Round of 32.</p>
+            <p class="eyebrow">2026 World Cup Bracket Challenge</p>
+            <h1>Third-Place Picks</h1>
+            <p>Select the 8 third-place teams you think will advance to the Round of 32.</p>
         </header>
 
         <div class="step-bar">
             <div class="step completed">1. Group Stage</div>
-            <div class="step active">2. Third-Place Ranking</div>
+            <div class="step active">2. Third-Place Picks</div>
             <div class="step">3. Bracket</div>
         </div>
 
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
+
         <form method="POST" id="third-place-form">
-            <div class="ranking-card">
-                <h2>Top 8 Advance</h2>
-                <p class="helper-text">
-                    Positions 1-8 qualify. Positions 9-12 are eliminated.
-                </p>
-
-                <ol id="third-place-list" class="drag-list">
-                    {% for item in third_place_teams %}
-                        <li
-                            class="drag-item"
-                            draggable="true"
-                            data-group="{{ item.group }}"
-                            data-team="{{ item.team }}"
-                            data-flag="{{ item.flag }}"
-                        >
-                            <span class="rank-number"></span>
-
-                            <span class="third-team-info">
-                                <span class="team-line">
-                                    <img
-                                        src="{{ url_for('static', filename=item.flag) }}"
-                                        alt="{{ item.team }} flag"
-                                        class="flag-img"
-                                    >
-                                    <strong>{{ item.team }}</strong>
-                                </span>
-                                <small>Group {{ item.group }}</small>
-                            </span>
-
-                            <span class="drag-handle">☰</span>
-                        </li>
-                    {% endfor %}
-                </ol>
-
-                <div id="hidden-ranking-inputs"></div>
+            <div class="third-place-counter">
+                <span id="selected-count">0</span>/8 selected
             </div>
 
+            <div class="third-place-select-list">
+                {% for item in third_place_teams %}
+                    {% set group_letter = item.group %}
+                    {% set is_selected = saved_third_place_ranking and group_letter in saved_third_place_ranking[:8] %}
+
+                    <button
+                        type="button"
+                        class="third-place-choice {% if is_selected %}third-choice-selected{% endif %}"
+                        data-group="{{ group_letter }}"
+                        data-team="{{ item.team }}"
+                        data-flag="{{ item.flag }}"
+                    >
+                        <span class="third-group-label">Group {{ group_letter }}</span>
+
+                        <img
+                            src="{{ url_for('static', filename=item.flag) }}"
+                            alt="{{ item.team }} flag"
+                            class="flag-img"
+                        >
+
+                        <span class="third-team-name">{{ item.team }}</span>
+
+                        <span class="third-status">
+                            {% if is_selected %}Advancing{% else %}Click to select{% endif %}
+                        </span>
+                    </button>
+                {% endfor %}
+            </div>
+
+            <div id="hidden-third-place-inputs"></div>
+
             <div class="button-row">
-                <a href="{{ url_for('group_stage') }}" class="secondary-button">Back to Group Stage</a>
-                <button type="submit" class="main-button">Generate Bracket</button>
+                <a href="{{ url_for('group_stage') }}" class="secondary-button">
+                    Back to Group Stage
+                </a>
+
+                <button type="submit" class="main-button">
+                    Continue to Bracket
+                </button>
             </div>
         </form>
     </div>
 
     <script>
-        const list = document.getElementById("third-place-list");
-        const form = document.getElementById("third-place-form");
-        const hiddenInputs = document.getElementById("hidden-ranking-inputs");
+        const thirdPlaceForm = document.getElementById("third-place-form");
+        const hiddenThirdPlaceInputs = document.getElementById("hidden-third-place-inputs");
+        const selectedCountElement = document.getElementById("selected-count");
 
-        function updateRankNumbers() {
-            const items = list.querySelectorAll(".drag-item");
+        function getSelectedChoices() {
+            return Array.from(document.querySelectorAll(".third-place-choice.third-choice-selected"));
+        }
 
-            items.forEach((item, index) => {
-                const rankNumber = item.querySelector(".rank-number");
-                rankNumber.textContent = index + 1;
+        function getUnselectedChoices() {
+            return Array.from(document.querySelectorAll(".third-place-choice:not(.third-choice-selected)"));
+        }
 
-                item.classList.remove("qualified", "eliminated");
+        function updateThirdPlaceStyles() {
+            const selected = getSelectedChoices();
+            const unselected = getUnselectedChoices();
 
-                if (index < 8) {
-                    item.classList.add("qualified");
+            selectedCountElement.textContent = selected.length;
+
+            document.querySelectorAll(".third-place-choice").forEach((choice) => {
+                choice.classList.remove("third-choice-eliminated");
+                const status = choice.querySelector(".third-status");
+
+                if (choice.classList.contains("third-choice-selected")) {
+                    status.textContent = "Advancing";
                 } else {
-                    item.classList.add("eliminated");
+                    status.textContent = "Click to select";
                 }
             });
+
+            if (selected.length === 8) {
+                unselected.forEach((choice) => {
+                    choice.classList.add("third-choice-eliminated");
+                    choice.querySelector(".third-status").textContent = "Eliminated";
+                });
+            }
         }
 
-        function getDragAfterElement(container, y) {
-            const draggableElements = [
-                ...container.querySelectorAll(".drag-item:not(.dragging)")
-            ];
+        document.querySelectorAll(".third-place-choice").forEach((choice) => {
+            choice.addEventListener("click", function() {
+                const isSelected = choice.classList.contains("third-choice-selected");
+                const selectedCount = getSelectedChoices().length;
 
-            return draggableElements.reduce((closest, child) => {
-                const box = child.getBoundingClientRect();
-                const offset = y - box.top - box.height / 2;
-
-                if (offset < 0 && offset > closest.offset) {
-                    return {
-                        offset: offset,
-                        element: child
-                    };
+                if (isSelected) {
+                    choice.classList.remove("third-choice-selected");
+                    updateThirdPlaceStyles();
+                    return;
                 }
 
-                return closest;
-            }, {
-                offset: Number.NEGATIVE_INFINITY
-            }).element;
-        }
+                if (selectedCount >= 8) {
+                    alert("You can only select 8 third-place teams to advance.");
+                    return;
+                }
 
-        list.addEventListener("dragstart", function(event) {
-            event.target.classList.add("dragging");
+                choice.classList.add("third-choice-selected");
+                updateThirdPlaceStyles();
+            });
         });
 
-        list.addEventListener("dragend", function(event) {
-            event.target.classList.remove("dragging");
-            updateRankNumbers();
-        });
+        thirdPlaceForm.addEventListener("submit", function(event) {
+            hiddenThirdPlaceInputs.innerHTML = "";
 
-        list.addEventListener("dragover", function(event) {
-            event.preventDefault();
+            const selected = getSelectedChoices();
 
-            const afterElement = getDragAfterElement(list, event.clientY);
-            const dragging = document.querySelector(".dragging");
-
-            if (!dragging) {
+            if (selected.length !== 8) {
+                event.preventDefault();
+                alert("Please select exactly 8 third-place teams to advance.");
                 return;
             }
 
-            if (afterElement == null) {
-                list.appendChild(dragging);
-            } else {
-                list.insertBefore(dragging, afterElement);
-            }
-        });
+            const selectedGroups = selected.map((choice) => choice.dataset.group);
 
-        form.addEventListener("submit", function() {
-            hiddenInputs.innerHTML = "";
+            /*
+                Important:
+                Your old backend expects rank_1 through rank_12.
+                We will send selected 8 first, then the eliminated 4.
+            */
+            const eliminatedGroups = getUnselectedChoices().map((choice) => choice.dataset.group);
+            const finalOrder = selectedGroups.concat(eliminatedGroups);
 
-            const items = list.querySelectorAll(".drag-item");
-
-            items.forEach((item, index) => {
+            finalOrder.forEach((groupLetter, index) => {
                 const input = document.createElement("input");
                 input.type = "hidden";
                 input.name = `rank_${index + 1}`;
-                input.value = item.dataset.group;
-
-                hiddenInputs.appendChild(input);
+                input.value = groupLetter;
+                hiddenThirdPlaceInputs.appendChild(input);
             });
         });
 
-        updateRankNumbers();
+        updateThirdPlaceStyles();
     </script>
 </body>
 </html>

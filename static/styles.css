@@ -3189,3 +3189,838 @@ body::before {
     color: #111827;
 }
 
+/* =========================
+   GROUP STAGE SLOT-BASED UI
+========================= */
+
+.group-slot-layout {
+    grid-template-columns: repeat(2, minmax(360px, 1fr));
+    gap: 28px;
+}
+
+.group-slot-card {
+    padding: 20px;
+    background: var(--wc-black, #050505);
+    border: 3px solid white;
+}
+
+.group-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.group-card-header h2 {
+    margin: 0;
+    font-size: 26px;
+    text-align: left;
+}
+
+.team-bank {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.team-chip {
+    min-height: 54px;
+    background: white;
+    color: #111827;
+    border: 2px solid #111827;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    font-weight: 1000;
+    cursor: grab;
+    user-select: none;
+    transition: transform 0.12s ease, opacity 0.12s ease, box-shadow 0.12s ease;
+}
+
+.team-chip:hover {
+    transform: translateY(-2px);
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.25);
+}
+
+.team-chip:active {
+    cursor: grabbing;
+}
+
+.team-chip .flag-img {
+    width: 28px;
+    height: 22px;
+    object-fit: cover;
+}
+
+.team-chip.used-chip {
+    opacity: 0.35;
+    cursor: not-allowed;
+    filter: grayscale(0.7);
+}
+
+.team-chip.dragging {
+    opacity: 0.5;
+}
+
+.group-position-list {
+    border-left: 6px solid #00843d;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.group-position-slot {
+    min-height: 68px;
+    display: grid;
+    grid-template-columns: 54px 1fr 42px;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: #111827;
+    color: white;
+    border-bottom: 2px dashed rgba(255, 255, 255, 0.25);
+    cursor: grab;
+    transition: background 0.12s ease, transform 0.12s ease;
+}
+
+.group-position-slot:last-child {
+    border-bottom: none;
+}
+
+.group-position-slot.slot-hover {
+    background: #1d4ed8;
+    outline: 3px solid white;
+    outline-offset: -3px;
+}
+
+.group-position-slot.dragging-slot {
+    opacity: 0.45;
+}
+
+.position-number {
+    font-size: 20px;
+    font-weight: 1000;
+    text-align: center;
+}
+
+.slot-team-display {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.slot-team-display .flag-img {
+    width: 30px;
+    height: 24px;
+    object-fit: cover;
+}
+
+.slot-team-name {
+    font-weight: 1000;
+    white-space: normal;
+    line-height: 1.1;
+}
+
+.slot-placeholder {
+    color: rgba(255, 255, 255, 0.55);
+    font-weight: 800;
+}
+
+.drag-dots {
+    font-size: 22px;
+    color: rgba(255, 255, 255, 0.65);
+    text-align: center;
+}
+
+/* Keep your placement color logic */
+.group-position-slot.position-first {
+    border-left: 8px solid #facc15;
+}
+
+.group-position-slot.position-second {
+    border-left: 8px solid #d1d5db;
+}
+
+.group-position-slot.position-third {
+    border-left: 8px solid #b45309;
+}
+
+.group-position-slot.position-fourth {
+    border-left: 8px solid #0057ff;
+}
+
+@media (max-width: 1000px) {
+    .group-slot-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 560px) {
+    .team-bank {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .group-position-slot {
+        grid-template-columns: 42px 1fr 30px;
+    }
+}
+
+
+/* =========================
+   GROUP STAGE SLOT HIGHLIGHTS
+   Top 2 = light green
+   3rd = light yellow
+   4th = light gray
+========================= */
+
+.group-position-slot.position-first,
+.group-position-slot.position-second {
+    background: #eaf8ea;   /* light green */
+    color: #111827;
+    border-bottom: 2px dashed rgba(0, 0, 0, 0.12);
+}
+
+.group-position-slot.position-third {
+    background: #fff7d6;   /* light yellow */
+    color: #111827;
+    border-bottom: 2px dashed rgba(0, 0, 0, 0.12);
+}
+
+.group-position-slot.position-fourth {
+    background: #f3f4f6;   /* light gray */
+    color: #111827;
+    border-bottom: 2px dashed rgba(0, 0, 0, 0.12);
+}
+
+/* Keep the colored left bars too */
+.group-position-slot.position-first {
+    border-left: 8px solid #22c55e;
+}
+
+.group-position-slot.position-second {
+    border-left: 8px solid #16a34a;
+}
+
+.group-position-slot.position-third {
+    border-left: 8px solid #f59e0b;
+}
+
+.group-position-slot.position-fourth {
+    border-left: 8px solid #6b7280;
+}
+
+/* Text inside the slots should be dark and readable */
+.group-position-slot .position-number,
+.group-position-slot .slot-team-name,
+.group-position-slot .drag-dots {
+    color: #111827;
+}
+
+/* Placeholder text for empty slots */
+.group-position-slot .slot-placeholder {
+    color: #6b7280;
+}
+
+
+/* =========================
+   GROUP STAGE DARK SLOT FILTERS
+   Black base + green/yellow overlay feel
+========================= */
+
+.group-position-slot {
+    color: white;
+    border-bottom: 2px dashed rgba(255, 255, 255, 0.18);
+}
+
+/* Top 2: black with green filter */
+.group-position-slot.position-first,
+.group-position-slot.position-second {
+    background: linear-gradient(
+        rgba(34, 197, 94, 0.28),
+        rgba(34, 197, 94, 0.28)
+    ),
+    #050505;
+    border-left: 8px solid #22c55e;
+}
+
+/* 3rd place: black with yellow/gold filter */
+.group-position-slot.position-third {
+    background: linear-gradient(
+        rgba(250, 204, 21, 0.30),
+        rgba(250, 204, 21, 0.30)
+    ),
+    #050505;
+    border-left: 8px solid #facc15;
+}
+
+/* 4th place: black with subtle gray/blue filter */
+.group-position-slot.position-fourth {
+    background: linear-gradient(
+        rgba(148, 163, 184, 0.18),
+        rgba(148, 163, 184, 0.18)
+    ),
+    #050505;
+    border-left: 8px solid #64748b;
+}
+
+/* Keep text readable on dark rows */
+.group-position-slot .position-number,
+.group-position-slot .slot-team-name,
+.group-position-slot .drag-dots {
+    color: white;
+}
+
+.group-position-slot .slot-placeholder {
+    color: rgba(255, 255, 255, 0.62);
+}
+
+/* Hover while dragging */
+.group-position-slot.slot-hover {
+    background: linear-gradient(
+        rgba(0, 87, 255, 0.38),
+        rgba(0, 87, 255, 0.38)
+    ),
+    #050505;
+    outline: 3px solid white;
+    outline-offset: -3px;
+}
+
+/* =========================
+   GROUP STAGE CLICK-TO-RANK UI
+========================= */
+
+.click-rank-groups {
+    grid-template-columns: repeat(2, minmax(360px, 1fr));
+    gap: 28px;
+}
+
+.click-rank-card {
+    padding: 20px;
+}
+
+.group-instruction {
+    background: white;
+    color: #111827;
+    border: 2px solid #111827;
+    padding: 7px 10px;
+    font-weight: 1000;
+    text-transform: uppercase;
+    font-size: 12px;
+}
+
+.team-choice-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.team-choice {
+    position: relative;
+    min-height: 72px;
+    background: black;
+    color: white;
+    border: 3px solid #f7f9fc;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    cursor: pointer;
+    font-weight: 1000;
+    padding: 8px;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+}
+
+.team-choice:hover {
+    transform: translateY(-2px);
+    box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.25);
+}
+
+.team-choice .flag-img {
+    width: 34px;
+    height: 26px;
+    object-fit: cover;
+}
+
+.team-choice-code {
+    font-size: 15px;
+}
+
+.team-choice-name {
+    display: none;
+}
+
+/* .team-choice-rank {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    min-width: 28px;
+    height: 28px;
+    background: #0057ff;
+    color: white;
+    border: 2px solid white;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 1000;
+} */
+
+.team-choice-selected {
+    background: #00843d;
+    color: white;
+    border-color: white;
+}
+
+.team-choice-selected .team-choice-rank {
+    display: flex;
+}
+
+.ranked-slots {
+    display: grid;
+    gap: 8px;
+}
+
+.rank-slot {
+    min-height: 64px;
+    display: grid;
+    grid-template-columns: 52px 1fr 106px;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px;
+    border: 2px solid white;
+    color: white;
+    background: #050505;
+}
+
+.rank-first,
+.rank-second {
+    background:
+        linear-gradient(rgba(34, 197, 94, 0.28), rgba(34, 197, 94, 0.28)),
+        #050505;
+    border-left: 8px solid #22c55e;
+}
+
+.rank-third {
+    background:
+        linear-gradient(rgba(250, 204, 21, 0.30), rgba(250, 204, 21, 0.30)),
+        #050505;
+    border-left: 8px solid #facc15;
+}
+
+.rank-fourth {
+    background:
+        linear-gradient(rgba(148, 163, 184, 0.18), rgba(148, 163, 184, 0.18)),
+        #050505;
+    border-left: 8px solid #64748b;
+}
+
+.rank-number {
+    background: black;
+    color: white;
+    border: 2px solid white;
+    height: 34px;
+    width: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 1000;
+}
+
+.rank-slot-team {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    font-weight: 1000;
+}
+
+.rank-slot-team .flag-img {
+    width: 32px;
+    height: 24px;
+    object-fit: cover;
+}
+
+.rank-slot-team span {
+    white-space: normal;
+    line-height: 1.1;
+}
+
+.rank-placeholder {
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.rank-controls {
+    display: flex;
+    justify-content: flex-end;
+    gap: 5px;
+}
+
+.rank-move-button,
+.rank-remove-button {
+    width: 30px;
+    height: 30px;
+    border: 2px solid white;
+    background: #111827;
+    color: white;
+    font-weight: 1000;
+    cursor: pointer;
+}
+
+.rank-remove-button {
+    background: #e10600;
+}
+
+.rank-move-button:hover {
+    background: #0057ff;
+}
+
+.rank-remove-button:hover {
+    background: #9f1515;
+}
+
+@media (max-width: 1000px) {
+    .click-rank-groups {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 560px) {
+    .team-choice-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .rank-slot {
+        grid-template-columns: 42px 1fr;
+        gap: 8px;
+    }
+
+    .rank-controls {
+        grid-column: 2;
+        justify-content: flex-start;
+    }
+}
+
+
+/* =========================
+   THIRD-PLACE CLICK SELECTION UI
+========================= */
+
+.third-place-counter {
+    width: fit-content;
+    margin: 0 auto 24px;
+    padding: 12px 22px;
+    background: #050505;
+    color: white;
+    border: 3px solid white;
+    font-size: 22px;
+    font-weight: 1000;
+    text-transform: uppercase;
+    box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.25);
+}
+
+.third-place-select-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(240px, 1fr));
+    gap: 18px;
+    margin-bottom: 30px;
+}
+
+.third-place-choice {
+    position: relative;
+    min-height: 140px;
+    background: #050505;
+    color: white;
+    border: 3px solid white;
+    padding: 16px;
+    display: grid;
+    grid-template-columns: 46px 1fr;
+    grid-template-areas:
+        "group group"
+        "flag name"
+        "status status";
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    text-align: left;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+}
+
+.third-place-choice:hover {
+    transform: translateY(-2px);
+    box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.24);
+}
+
+.third-group-label {
+    grid-area: group;
+    font-size: 13px;
+    text-transform: uppercase;
+    font-weight: 1000;
+    color: rgba(255, 255, 255, 0.72);
+}
+
+.third-place-choice .flag-img {
+    grid-area: flag;
+    width: 38px;
+    height: 28px;
+    object-fit: cover;
+}
+
+.third-team-name {
+    grid-area: name;
+    font-size: 20px;
+    font-weight: 1000;
+    line-height: 1.1;
+}
+
+.third-status {
+    grid-area: status;
+    margin-top: 8px;
+    padding: 8px 10px;
+    background: rgba(255, 255, 255, 0.12);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    text-align: center;
+    font-weight: 1000;
+    text-transform: uppercase;
+    font-size: 12px;
+}
+
+.third-choice-selected {
+    background:
+        linear-gradient(rgba(34, 197, 94, 0.42), rgba(34, 197, 94, 0.42)),
+        #050505;
+    border-color: #22c55e;
+}
+
+.third-choice-selected::after {
+    content: "✓";
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    width: 30px;
+    height: 30px;
+    background: #22c55e;
+    color: white;
+    border: 2px solid white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 1000;
+}
+
+.third-choice-eliminated {
+    background:
+        linear-gradient(rgba(225, 6, 0, 0.42), rgba(225, 6, 0, 0.42)),
+        #050505;
+    border-color: #e10600;
+}
+
+.third-choice-eliminated::after {
+    content: "×";
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    width: 30px;
+    height: 30px;
+    background: #e10600;
+    color: white;
+    border: 2px solid white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 1000;
+}
+
+.third-choice-selected .third-status {
+    background: #22c55e;
+    border-color: white;
+    color: white;
+}
+
+.third-choice-eliminated .third-status {
+    background: #e10600;
+    border-color: white;
+    color: white;
+}
+
+@media (max-width: 900px) {
+    .third-place-select-grid {
+        grid-template-columns: repeat(2, minmax(220px, 1fr));
+    }
+}
+
+@media (max-width: 560px) {
+    .third-place-select-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .third-place-choice {
+        min-height: 116px;
+    }
+}
+
+
+/* =========================
+   THIRD-PLACE VERTICAL LIST
+========================= */
+
+.third-place-select-list {
+    max-width: 850px;
+    margin: 0 auto 30px;
+    display: grid;
+    gap: 12px;
+}
+
+.third-place-select-list .third-place-choice {
+    min-height: 74px;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 110px 42px 1fr 150px;
+    grid-template-areas: "group flag name status";
+    align-items: center;
+    gap: 14px;
+    padding: 12px 18px;
+    text-align: left;
+}
+
+.third-place-select-list .third-group-label {
+    grid-area: group;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 13px;
+    font-weight: 1000;
+    text-transform: uppercase;
+}
+
+.third-place-select-list .flag-img {
+    grid-area: flag;
+    width: 36px;
+    height: 26px;
+    object-fit: cover;
+}
+
+.third-place-select-list .third-team-name {
+    grid-area: name;
+    font-size: 20px;
+    font-weight: 1000;
+    line-height: 1.1;
+}
+
+.third-place-select-list .third-status {
+    grid-area: status;
+    margin-top: 0;
+    padding: 8px 10px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 1000;
+    text-transform: uppercase;
+}
+
+/* Selected = green filter */
+.third-place-select-list .third-choice-selected {
+    background:
+        linear-gradient(rgba(34, 197, 94, 0.42), rgba(34, 197, 94, 0.42)),
+        #050505;
+    border-color: #22c55e;
+}
+
+/* Eliminated = red filter */
+.third-place-select-list .third-choice-eliminated {
+    background:
+        linear-gradient(rgba(225, 6, 0, 0.42), rgba(225, 6, 0, 0.42)),
+        #050505;
+    border-color: #e10600;
+}
+
+@media (max-width: 700px) {
+    .third-place-select-list .third-place-choice {
+        grid-template-columns: 1fr 42px 1fr;
+        grid-template-areas:
+            "group group group"
+            "flag name name"
+            "status status status";
+        min-height: 110px;
+    }
+
+    .third-place-select-list .third-status {
+        width: 100%;
+    }
+}
+
+
+/* Hidden picks preview for regular users viewing other brackets */
+.private-bracket-preview {
+    width: fit-content;
+    margin: 22px auto 0;
+    padding: 12px 18px;
+    background: #050505;
+    color: white;
+    border: 2px solid white;
+    font-weight: 1000;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+}
+
+.admin-view-pill {
+    display: inline-block;
+    margin: 4px 0 10px;
+    padding: 7px 12px;
+    background: #facc15;
+    color: #111827;
+    border: 2px solid white;
+    font-size: 12px;
+    font-weight: 1000;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+
+/* =========================
+   PASSWORD RESET UI
+========================= */
+
+.success-message {
+    background: #00843d;
+    color: white;
+    border: 3px solid white;
+    padding: 14px 18px;
+    text-align: center;
+    font-weight: 1000;
+    margin-bottom: 18px;
+}
+
+.auth-switch {
+    text-align: center;
+    margin-top: 18px;
+    color: white;
+    font-weight: 800;
+}
+
+.auth-switch a {
+    color: white;
+    text-decoration: underline;
+    font-weight: 1000;
+}
+
+.auth-card label {
+    display: block;
+    margin-top: 14px;
+    margin-bottom: 6px;
+    color: white;
+    font-weight: 1000;
+}
+
+.auth-card input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px;
+    margin-bottom: 12px;
+}
+
+
+
+
+
+

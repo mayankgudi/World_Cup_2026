@@ -1,5 +1,8 @@
 import os
-import json
+import smtplib
+from email.message import EmailMessage
+from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
+from werkzeug.security import generate_password_hash
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, redirect, url_for, session
 from worldcup_logic import generate_round_of_32
@@ -70,6 +73,10 @@ def current_user_is_admin():
 
 # Needed so Flask can use session storage.
 app.secret_key = "world-cup-predictor-secret-key"
+
+# --------------------------------
+#            Constants
+# --------------------------------
 
 GROUPS = {
     "A": [
@@ -158,6 +165,99 @@ GROUPS = {
 }
 
 
+TEAM_CODES = {
+    "Czechia": "CZE",
+    "Mexico": "MEX",
+    "South Africa": "RSA",
+    "South Korea": "KOR",
+
+    "Bosnia & Herzegovina": "BIH",
+    "Canada": "CAN",
+    "Qatar": "QAT",
+    "Switzerland": "SUI",
+
+    "Brazil": "BRA",
+    "Haiti": "HAI",
+    "Morocco": "MAR",
+    "Scotland": "SCO",
+
+    "Australia": "AUS",
+    "Paraguay": "PAR",
+    "Turkiye": "TUR",
+    "USA": "USA",
+
+    "Curacao": "CUW",
+    "Ecuador": "ECU",
+    "Germany": "GER",
+    "Ivory Coast": "CIV",
+
+    "Japan": "JPN",
+    "Netherlands": "NED",
+    "Sweden": "SWE",
+    "Tunisia": "TUN",
+
+    "Belgium": "BEL",
+    "Egypt": "EGY",
+    "Iran": "IRN",
+    "New Zealand": "NZL",
+
+    "Cape Verde": "CPV",
+    "Saudi Arabia": "KSA",
+    "Spain": "ESP",
+    "Uruguay": "URU",
+
+    "France": "FRA",
+    "Iraq": "IRQ",
+    "Norway": "NOR",
+    "Senegal": "SEN",
+
+    "Algeria": "ALG",
+    "Argentina": "ARG",
+    "Austria": "AUT",
+    "Jordan": "JOR",
+
+    "Colombia": "COL",
+    "DR Congo": "COD",
+    "Portugal": "POR",
+    "Uzbekistan": "UZB",
+
+    "Croatia": "CRO",
+    "England": "ENG",
+    "Ghana": "GHA",
+    "Panama": "PAN",
+}
+
+
+SCORING_RULES = {
+    "group_winner": 2,
+    "group_runner_up": 2,
+    "third_place_top_8": 1,
+    "round_of_32": 1,
+    "round_of_16": 2,
+    "quarterfinal": 4,
+    "semifinal": 8,
+    "third_place_match": 10,
+    "final": 20,
+}
+
+MAX_POINTS = {
+    "group_stage": 48,
+    "third_place_race": 8,
+    "knockout": 94,
+    "total": 150,
+}
+
+
+
+
+# --------------------------------
+#           Functions
+# --------------------------------
+
+def get_team_code(team_name):
+    return TEAM_CODES.get(team_name, team_name[:3].upper())
+
+
 def get_team_flag(team_name):
     for teams in GROUPS.values():
         for team in teams:
@@ -216,7 +316,11 @@ def get_password_reset_serializer():
 
 def generate_password_reset_token(email):
     serializer = get_password_reset_serializer()
-    return serializer.dumps(email, salt="password-reset-salt")
+
+    return serializer.dumps(
+        email,
+        salt="password-reset-salt"
+    )
 
 
 def verify_password_reset_token(token, expiration_seconds=1800):
@@ -229,10 +333,48 @@ def verify_password_reset_token(token, expiration_seconds=1800):
             max_age=expiration_seconds
         )
         return email
+
     except SignatureExpired:
         return None
+
     except BadSignature:
         return None
+
+
+def send_password_reset_email(to_email, reset_link):
+    mail_server = os.getenv("MAIL_SERVER")
+    mail_port = int(os.getenv("MAIL_PORT", "587"))
+    mail_username = os.getenv("MAIL_USERNAME")
+    mail_password = os.getenv("MAIL_PASSWORD")
+    mail_sender = os.getenv("MAIL_DEFAULT_SENDER", mail_username)
+
+    if not all([mail_server, mail_username, mail_password, mail_sender]):
+        print("Password reset link:", reset_link)
+        return
+
+    message = EmailMessage()
+    message["Subject"] = "Reset your World Cup Bracket Challenge password"
+    message["From"] = mail_sender
+    message["To"] = to_email
+
+    message.set_content(
+        f"""
+You requested a password reset for your World Cup Bracket Challenge account.
+
+Click the link below to reset your password:
+
+{reset_link}
+
+This link expires in 30 minutes.
+
+If you did not request this, you can ignore this email.
+"""
+    )
+
+    with smtplib.SMTP(mail_server, mail_port) as server:
+        server.starttls()
+        server.login(mail_username, mail_password)
+        server.send_message(message)
 
 
 
@@ -341,7 +483,6 @@ def forgot_password():
 
         user = User.query.filter_by(email=email).first()
 
-        # Always show the same message so people cannot guess valid emails.
         message = "If an account exists with that email, a password reset link has been sent."
 
         if user:
@@ -353,11 +494,7 @@ def forgot_password():
                 _external=True
             )
 
-            # DEVELOPMENT VERSION:
-            # Print reset link to terminal for now.
-            print("Password reset link:", reset_link)
-
-            # Later, replace this print with real email sending.
+            send_password_reset_email(user.email, reset_link)
 
     return render_template(
         "forgot_password.html",
@@ -386,24 +523,31 @@ def reset_password(token):
         )
 
     if request.method == "POST":
-        new_password = request.form["password"]
+        password = request.form["password"]
         confirm_password = request.form["confirm_password"]
 
-        if not new_password or not confirm_password:
+        if not password or not confirm_password:
             return render_template(
                 "reset_password.html",
                 error="Both password fields are required.",
                 token=token
             )
 
-        if new_password != confirm_password:
+        if password != confirm_password:
             return render_template(
                 "reset_password.html",
                 error="Passwords do not match.",
                 token=token
             )
 
-        user.password_hash = generate_password_hash(new_password)
+        if len(password) < 8:
+            return render_template(
+                "reset_password.html",
+                error="Password must be at least 8 characters long.",
+                token=token
+            )
+
+        user.password_hash = generate_password_hash(password)
         db.session.commit()
 
         return redirect(url_for("login", reset_success="1"))
@@ -436,14 +580,20 @@ def group_stage():
         except KeyError:
             return render_template(
                 "group_stage.html",
-                groups=get_ordered_groups_for_display(),
-                error="Please rank every team in every group.",
-                editing_bracket_id=session.get("editing_bracket_id")
+                groups=GROUPS,
+                get_team_code=get_team_code,
+                get_team_flag=get_team_flag,
+                saved_group_results=session.get("group_results"),
+                editing_bracket_id=session.get("editing_bracket_id"),
+                error="Please fill every position in every group."
             )
 
     return render_template(
         "group_stage.html",
-        groups=get_ordered_groups_for_display(),
+        groups=GROUPS,
+        get_team_code=get_team_code,
+        get_team_flag=get_team_flag,
+        saved_group_results=session.get("group_results"),
         editing_bracket_id=session.get("editing_bracket_id")
     )
 
@@ -495,8 +645,16 @@ def third_place():
     if request.method == "POST":
         third_place_ranking = []
 
-        for i in range(1, 13):
-            third_place_ranking.append(request.form[f"rank_{i}"])
+        try:
+            for i in range(1, 13):
+                third_place_ranking.append(request.form[f"rank_{i}"])
+        except KeyError:
+            return render_template(
+                "third_place.html",
+                third_place_teams=get_third_place_teams_for_display(),
+                saved_third_place_ranking=session.get("third_place_ranking"),
+                error="Please select exactly 8 third-place teams."
+            )
 
         session["third_place_ranking"] = third_place_ranking
 
@@ -505,7 +663,7 @@ def third_place():
     return render_template(
         "third_place.html",
         third_place_teams=get_third_place_teams_for_display(),
-        editing_bracket_id=session.get("editing_bracket_id")
+        saved_third_place_ranking=session.get("third_place_ranking")
     )
 
 
@@ -623,7 +781,11 @@ def save_bracket():
 @app.route("/saved/<int:prediction_id>")
 @login_required
 def view_bracket(prediction_id):
+    current_user = get_current_user()
     prediction = BracketPrediction.query.get_or_404(prediction_id)
+
+    if prediction.user_id != current_user.id and not current_user.is_admin:
+        return redirect(url_for("saved_brackets"))
 
     return render_template(
         "saved_bracket.html",
