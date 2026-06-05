@@ -1,4 +1,5 @@
 import os
+import json
 import smtplib
 from email.message import EmailMessage
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
