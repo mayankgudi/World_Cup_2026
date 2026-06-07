@@ -4020,7 +4020,66 @@ body::before {
 }
 
 
+/* =========================
+   TIEBREAKER INPUT / DISPLAY
+========================= */
 
+.tiebreaker-input-box {
+    margin-top: 22px;
+    padding: 18px;
+    background: #050505;
+    border: 3px solid white;
+    color: white;
+}
+
+.tiebreaker-input-box label {
+    display: block;
+    font-weight: 1000;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    color: white;
+}
+
+.tiebreaker-helper {
+    margin: 0 0 12px;
+    color: rgba(255, 255, 255, 0.78);
+    font-weight: 700;
+}
+
+.tiebreaker-input-box input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 13px;
+    border: 3px solid white;
+    background: white;
+    color: #111827;
+    font-weight: 900;
+    font-size: 18px;
+}
+
+.tiebreaker-display-card {
+    max-width: 460px;
+    margin: 24px auto 34px;
+    padding: 20px;
+    background: #050505;
+    border: 3px solid white;
+    text-align: center;
+    color: white;
+    box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.28);
+}
+
+.tiebreaker-display-card h2 {
+    margin: 0 0 8px;
+    color: white;
+    text-transform: uppercase;
+}
+
+.tiebreaker-display-card p {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 1000;
+    color: white;
+}
 
 
 

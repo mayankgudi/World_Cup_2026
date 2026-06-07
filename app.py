@@ -704,6 +704,7 @@ def bracket():
         third_place_ranking=third_place_ranking,
         editing_bracket_id=editing_bracket_id,
         saved_knockout_picks=session.get("knockout_picks"),
+        tiebreaker_goals=session.get("tiebreaker_goals"),
         bracket_name=bracket_name
     )
 
@@ -711,23 +712,28 @@ def bracket():
 @app.route("/save-bracket", methods=["POST"])
 @login_required
 def save_bracket():
-    group_results = session.get("group_results")
-    third_place_ranking = session.get("third_place_ranking")
-
-    if not group_results or not third_place_ranking:
-        return redirect(url_for("group_stage"))
-
     current_user = get_current_user()
 
-    if not current_user:
-        return redirect(url_for("login"))
-
+    group_results = session.get("group_results")
+    third_place_ranking = session.get("third_place_ranking")
+    knockout_picks_raw = request.form.get("knockout_picks")
     bracket_name = request.form.get("bracket_name", "").strip()
+    tiebreaker_goals_raw = request.form.get("tiebreaker_goals")
 
     if not bracket_name:
-        bracket_name = f"{current_user.username}'s Bracket"
+        bracket_name = "My World Cup Bracket"
 
-    knockout_picks_raw = request.form.get("knockout_picks", "{}")
+    try:
+        tiebreaker_goals = int(tiebreaker_goals_raw)
+    except (TypeError, ValueError):
+        return "Invalid tiebreaker. Please enter a whole number.", 400
+
+    if tiebreaker_goals < 0:
+        return "Invalid tiebreaker. Goals cannot be negative.", 400
+
+    if not group_results or not third_place_ranking or not knockout_picks_raw:
+        return "Missing bracket data. Please go back and complete all steps.", 400
+
     knockout_picks = json.loads(knockout_picks_raw)
 
     editing_bracket_id = session.get("editing_bracket_id")
@@ -742,11 +748,16 @@ def save_bracket():
         prediction.group_results = group_results
         prediction.third_place_ranking = third_place_ranking
         prediction.knockout_picks = knockout_picks
+        prediction.tiebreaker_goals = tiebreaker_goals
 
         db.session.commit()
 
         session.pop("editing_bracket_id", None)
+        session.pop("group_results", None)
+        session.pop("third_place_ranking", None)
         session.pop("knockout_picks", None)
+        session.pop("bracket_name", None)
+        session.pop("tiebreaker_goals", None)
 
         return redirect(url_for("view_bracket", prediction_id=prediction.id))
 
@@ -755,29 +766,30 @@ def save_bracket():
     ).count()
 
     if bracket_count >= 1:
-        return render_template(
-            "bracket.html",
-            bracket=add_flags_to_bracket(generate_round_of_32(group_results, third_place_ranking)),
-            error="You have already submitted a bracket. You may only submit 1 bracket per account.",
-            third_place_ranking=third_place_ranking,
-            editing_bracket_id=None,
-            saved_knockout_picks=None,
-            bracket_name=bracket_name
-        )
+        return redirect(url_for("saved_brackets", error="limit_reached"))
 
     prediction = BracketPrediction(
-        username=current_user.username,
         user_id=current_user.id,
+        username=current_user.username,
         bracket_name=bracket_name,
         group_results=group_results,
         third_place_ranking=third_place_ranking,
-        knockout_picks=knockout_picks
+        knockout_picks=knockout_picks,
+        tiebreaker_goals=tiebreaker_goals
     )
 
     db.session.add(prediction)
     db.session.commit()
 
+    session.pop("group_results", None)
+    session.pop("third_place_ranking", None)
+    session.pop("knockout_picks", None)
+    session.pop("bracket_name", None)
+    session.pop("tiebreaker_goals", None)
+
     return redirect(url_for("view_bracket", prediction_id=prediction.id))
+
+
 
 @app.route("/saved/<int:prediction_id>")
 @login_required
@@ -849,6 +861,7 @@ def edit_bracket(prediction_id):
     session["group_results"] = prediction.group_results
     session["third_place_ranking"] = prediction.third_place_ranking
     session["knockout_picks"] = prediction.knockout_picks
+    session["tiebreaker_goals"] = prediction.tiebreaker_goals
 
     return redirect(url_for("bracket"))
 

@@ -273,26 +273,42 @@
                 type="text"
                 id="bracket_name"
                 name="bracket_name"
-                placeholder="Example: It's Coming Home"
-                value="{{ bracket_name or '' }}"
+                value="{{ bracket_name if bracket_name else '' }}"
+                placeholder="My World Cup Bracket"
                 required
             >
 
+            <div class="tiebreaker-input-box">
+                <label for="tiebreaker_goals">
+                    Tiebreaker: Total Knockout Stage Goals
+                </label>
+
+                <p class="tiebreaker-helper">
+                    Predict the total number of goals scored across all knockout stage matches.
+                </p>
+
+                <input
+                    type="number"
+                    id="tiebreaker_goals"
+                    name="tiebreaker_goals"
+                    min="0"
+                    max="300"
+                    step="1"
+                    value="{{ tiebreaker_goals if tiebreaker_goals is defined and tiebreaker_goals is not none else '' }}"
+                    placeholder="Example: 118"
+                    required
+                >
+            </div>
+
             <input type="hidden" name="knockout_picks" id="knockout-picks-input">
 
-            <div class="button-row">
-                <button type="submit" class="main-button">
-                    {% if editing_bracket_id %}
-                        Update Bracket
-                    {% else %}
-                        Save Bracket
-                    {% endif %}
-                </button>
-
-                <a href="{{ url_for('saved_brackets') }}" class="secondary-button">
-                    View Saved Brackets
-                </a>
-            </div>
+            <button type="submit" class="main-button">
+                {% if editing_bracket_id %}
+                    Update Bracket
+                {% else %}
+                    Save Bracket
+                {% endif %}
+            </button>
         </div>
     </form>
 
