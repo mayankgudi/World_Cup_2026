@@ -433,8 +433,16 @@ def register():
 
 
 @app.route("/leaderboard")
+@login_required
 def leaderboard():
-    return render_template("leaderboard.html")
+    predictions = BracketPrediction.query.order_by(
+        BracketPrediction.bracket_name.asc()
+    ).all()
+
+    return render_template(
+        "leaderboard.html",
+        predictions=predictions
+    )
 
 
 
