@@ -186,6 +186,51 @@
             </div>
         </section>
 
+        <section class="leaderboard-card leaderboard-standings-card">
+            <h2>Submitted Brackets</h2>
+
+            <p class="leaderboard-helper">
+                Brackets are currently listed alphabetically. Once scoring begins, this table will be ranked by points.
+            </p>
+
+            {% if predictions %}
+                <div class="leaderboard-table-wrapper">
+                    <table class="leaderboard-table">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Bracket Name</th>
+                                <th>User</th>
+                                <th>Score</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for prediction in predictions %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+
+                                    <td>
+                                        <a href="{{ url_for('view_bracket', prediction_id=prediction.id) }}">
+                                            {{ prediction.bracket_name }}
+                                        </a>
+                                    </td>
+
+                                    <td>{{ prediction.username }}</td>
+
+                                    <td class="score-placeholder">TBD</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="leaderboard-empty">
+                    No brackets have been submitted yet.
+                </p>
+            {% endif %}
+        </section>
+
 
         <section class="leaderboard-card coming-soon-card">
             <h2>Live Rankings Coming Soon</h2>
