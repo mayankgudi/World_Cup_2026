@@ -79,6 +79,10 @@ app.secret_key = "world-cup-predictor-secret-key"
 #            Constants
 # --------------------------------
 
+SUBMISSIONS_LOCKED = True
+ADMIN_DELETE_ENABLED = False
+
+
 GROUPS = {
     "A": [
         {"name": "Czechia", "flag": "wc_flags/czechia.svg"},
@@ -433,8 +437,16 @@ def register():
 
 
 @app.route("/leaderboard")
+@login_required
 def leaderboard():
-    return render_template("leaderboard.html")
+    predictions = BracketPrediction.query.order_by(
+        BracketPrediction.bracket_name.asc()
+    ).all()
+
+    return render_template(
+        "leaderboard.html",
+        predictions=predictions
+    )
 
 
 
@@ -671,6 +683,7 @@ def third_place():
 @app.route("/bracket")
 @login_required
 def bracket():
+    submissions_locked=SUBMISSIONS_LOCKED
     group_results = session.get("group_results")
     third_place_ranking = session.get("third_place_ranking")
 
@@ -705,100 +718,100 @@ def bracket():
         editing_bracket_id=editing_bracket_id,
         saved_knockout_picks=session.get("knockout_picks"),
         tiebreaker_goals=session.get("tiebreaker_goals"),
-        bracket_name=bracket_name
+        bracket_name=bracket_name,
+        submissions_locked=SUBMISSIONS_LOCKED
     )
 
 
 @app.route("/save-bracket", methods=["POST"])
 @login_required
 def save_bracket():
-    current_user = get_current_user()
+    if SUBMISSIONS_LOCKED:
+        return redirect(url_for("saved_brackets", error="submissions_locked"))
 
-    group_results = session.get("group_results")
-    third_place_ranking = session.get("third_place_ranking")
-    knockout_picks_raw = request.form.get("knockout_picks")
-    bracket_name = request.form.get("bracket_name", "").strip()
-    tiebreaker_goals_raw = request.form.get("tiebreaker_goals")
+    # current_user = get_current_user()
 
-    if not bracket_name:
-        bracket_name = "My World Cup Bracket"
+    # group_results = session.get("group_results")
+    # third_place_ranking = session.get("third_place_ranking")
+    # knockout_picks_raw = request.form.get("knockout_picks")
+    # bracket_name = request.form.get("bracket_name", "").strip()
+    # tiebreaker_goals_raw = request.form.get("tiebreaker_goals")
 
-    try:
-        tiebreaker_goals = int(tiebreaker_goals_raw)
-    except (TypeError, ValueError):
-        return "Invalid tiebreaker. Please enter a whole number.", 400
+    # if not bracket_name:
+    #     bracket_name = "My World Cup Bracket"
 
-    if tiebreaker_goals < 0:
-        return "Invalid tiebreaker. Goals cannot be negative.", 400
+    # try:
+    #     tiebreaker_goals = int(tiebreaker_goals_raw)
+    # except (TypeError, ValueError):
+    #     return "Invalid tiebreaker. Please enter a whole number.", 400
 
-    if not group_results or not third_place_ranking or not knockout_picks_raw:
-        return "Missing bracket data. Please go back and complete all steps.", 400
+    # if tiebreaker_goals < 0:
+    #     return "Invalid tiebreaker. Goals cannot be negative.", 400
 
-    knockout_picks = json.loads(knockout_picks_raw)
+    # if not group_results or not third_place_ranking or not knockout_picks_raw:
+    #     return "Missing bracket data. Please go back and complete all steps.", 400
 
-    editing_bracket_id = session.get("editing_bracket_id")
+    # knockout_picks = json.loads(knockout_picks_raw)
 
-    if editing_bracket_id:
-        prediction = BracketPrediction.query.get_or_404(editing_bracket_id)
+    # editing_bracket_id = session.get("editing_bracket_id")
 
-        if prediction.user_id != current_user.id:
-            return redirect(url_for("saved_brackets"))
+    # if editing_bracket_id:
+    #     prediction = BracketPrediction.query.get_or_404(editing_bracket_id)
 
-        prediction.bracket_name = bracket_name
-        prediction.group_results = group_results
-        prediction.third_place_ranking = third_place_ranking
-        prediction.knockout_picks = knockout_picks
-        prediction.tiebreaker_goals = tiebreaker_goals
+    #     if prediction.user_id != current_user.id:
+    #         return redirect(url_for("saved_brackets"))
 
-        db.session.commit()
+    #     prediction.bracket_name = bracket_name
+    #     prediction.group_results = group_results
+    #     prediction.third_place_ranking = third_place_ranking
+    #     prediction.knockout_picks = knockout_picks
+    #     prediction.tiebreaker_goals = tiebreaker_goals
 
-        session.pop("editing_bracket_id", None)
-        session.pop("group_results", None)
-        session.pop("third_place_ranking", None)
-        session.pop("knockout_picks", None)
-        session.pop("bracket_name", None)
-        session.pop("tiebreaker_goals", None)
+    #     db.session.commit()
 
-        return redirect(url_for("view_bracket", prediction_id=prediction.id))
+    #     session.pop("editing_bracket_id", None)
+    #     session.pop("group_results", None)
+    #     session.pop("third_place_ranking", None)
+    #     session.pop("knockout_picks", None)
+    #     session.pop("bracket_name", None)
+    #     session.pop("tiebreaker_goals", None)
 
-    bracket_count = BracketPrediction.query.filter_by(
-        user_id=current_user.id
-    ).count()
+    #     return redirect(url_for("view_bracket", prediction_id=prediction.id))
 
-    if bracket_count >= 1:
-        return redirect(url_for("saved_brackets", error="limit_reached"))
+    # bracket_count = BracketPrediction.query.filter_by(
+    #     user_id=current_user.id
+    # ).count()
 
-    prediction = BracketPrediction(
-        user_id=current_user.id,
-        username=current_user.username,
-        bracket_name=bracket_name,
-        group_results=group_results,
-        third_place_ranking=third_place_ranking,
-        knockout_picks=knockout_picks,
-        tiebreaker_goals=tiebreaker_goals
-    )
+    # if bracket_count >= 1:
+    #     return redirect(url_for("saved_brackets", error="limit_reached"))
 
-    db.session.add(prediction)
-    db.session.commit()
+    # prediction = BracketPrediction(
+    #     user_id=current_user.id,
+    #     username=current_user.username,
+    #     bracket_name=bracket_name,
+    #     group_results=group_results,
+    #     third_place_ranking=third_place_ranking,
+    #     knockout_picks=knockout_picks,
+    #     tiebreaker_goals=tiebreaker_goals
+    # )
 
-    session.pop("group_results", None)
-    session.pop("third_place_ranking", None)
-    session.pop("knockout_picks", None)
-    session.pop("bracket_name", None)
-    session.pop("tiebreaker_goals", None)
+    # db.session.add(prediction)
+    # db.session.commit()
 
-    return redirect(url_for("view_bracket", prediction_id=prediction.id))
+    # session.pop("group_results", None)
+    # session.pop("third_place_ranking", None)
+    # session.pop("knockout_picks", None)
+    # session.pop("bracket_name", None)
+    # session.pop("tiebreaker_goals", None)
+
+    # return redirect(url_for("view_bracket", prediction_id=prediction.id))
 
 
 
 @app.route("/saved/<int:prediction_id>")
 @login_required
 def view_bracket(prediction_id):
-    current_user = get_current_user()
     prediction = BracketPrediction.query.get_or_404(prediction_id)
-
-    if prediction.user_id != current_user.id and not current_user.is_admin:
-        return redirect(url_for("saved_brackets"))
 
     return render_template(
         "saved_bracket.html",
@@ -825,20 +838,22 @@ def saved_brackets():
         predictions=predictions,
         get_team_flag=get_team_flag,
         user_has_bracket=user_has_bracket,
-        current_user_is_admin=current_user.is_admin
+        current_user_is_admin=current_user.is_admin,
+        admin_delete_enabled=ADMIN_DELETE_ENABLED
     )
 
 @app.route("/delete-bracket/<int:prediction_id>", methods=["POST"])
 @login_required
 def delete_bracket(prediction_id):
     current_user = get_current_user()
-
     prediction = BracketPrediction.query.get_or_404(prediction_id)
 
-    user_owns_bracket = prediction.user_id == current_user.id
-    user_is_admin = current_user.is_admin
+    is_admin = current_user.is_admin
 
-    if not user_owns_bracket and not user_is_admin:
+    if not ADMIN_DELETE_ENABLED:
+        return redirect(url_for("saved_brackets"))
+
+    if not is_admin:
         return redirect(url_for("saved_brackets"))
 
     db.session.delete(prediction)
@@ -850,38 +865,32 @@ def delete_bracket(prediction_id):
 @app.route("/edit-bracket/<int:prediction_id>")
 @login_required
 def edit_bracket(prediction_id):
-    current_user = get_current_user()
+    return redirect(url_for("saved_brackets"))
+    # current_user = get_current_user()
 
-    prediction = BracketPrediction.query.get_or_404(prediction_id)
+    # prediction = BracketPrediction.query.get_or_404(prediction_id)
 
-    if prediction.user_id != current_user.id:
-        return redirect(url_for("saved_brackets"))
+    # if prediction.user_id != current_user.id:
+    #     return redirect(url_for("saved_brackets"))
 
-    session["editing_bracket_id"] = prediction.id
-    session["group_results"] = prediction.group_results
-    session["third_place_ranking"] = prediction.third_place_ranking
-    session["knockout_picks"] = prediction.knockout_picks
-    session["tiebreaker_goals"] = prediction.tiebreaker_goals
+    # session["editing_bracket_id"] = prediction.id
+    # session["group_results"] = prediction.group_results
+    # session["third_place_ranking"] = prediction.third_place_ranking
+    # session["knockout_picks"] = prediction.knockout_picks
+    # session["tiebreaker_goals"] = prediction.tiebreaker_goals
 
-    return redirect(url_for("bracket"))
+    # return redirect(url_for("bracket"))
 
 
 @app.route("/new-bracket")
 @login_required
 def new_bracket():
-    current_user = get_current_user()
-
-    bracket_count = BracketPrediction.query.filter_by(
-        user_id=current_user.id
-    ).count()
-
-    if bracket_count >= 1:
-        return redirect(url_for("saved_brackets", error="limit_reached"))
-
     session.pop("group_results", None)
     session.pop("third_place_ranking", None)
     session.pop("knockout_picks", None)
     session.pop("editing_bracket_id", None)
+    session.pop("bracket_name", None)
+    session.pop("tiebreaker_goals", None)
 
     return redirect(url_for("group_stage"))
 

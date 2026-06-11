@@ -19,16 +19,9 @@
             <div class="step active">3. Bracket</div>
         </div>
 
-        {% if editing_bracket_id %}
-            <div class="save-card">
-                <h2>Editing Saved Bracket</h2>
-                <p>You are updating an existing bracket. Saving will overwrite the previous version.</p>
-            </div>
-        {% endif %}
-
         <div class="button-row">
             <a href="{{ url_for('home') }}" class="secondary-button">Home</a>
-            <a href="{{ url_for('saved_brackets') }}" class="secondary-button">My Saved Brackets</a>
+            <a href="{{ url_for('saved_brackets') }}" class="secondary-button">Saved Brackets</a>
             <a href="{{ url_for('logout') }}" class="danger-button">Logout</a>
         </div>
 
@@ -258,59 +251,70 @@
         </div>
     </div>
 
-    <form method="POST" action="{{ url_for('save_bracket') }}" id="save-bracket-form">
-        <div class="save-card">
-            <h2>
-                {% if editing_bracket_id %}
-                    Update Your Bracket
-                {% else %}
-                    Save Your Bracket
-                {% endif %}
-            </h2>
+    {% if submissions_locked %}
+        <div class="save-card submissions-locked-card">
+            <h2>Submissions Locked</h2>
 
-            <label for="bracket_name">Bracket Name</label>
-            <input
-                type="text"
-                id="bracket_name"
-                name="bracket_name"
-                value="{{ bracket_name if bracket_name else '' }}"
-                placeholder="My World Cup Bracket"
-                required
-            >
+            <p>
+                Bracket submissions are now locked. You can still use this page to test different group-stage,
+                third-place, and knockout scenarios, but this bracket cannot be saved.
+            </p>
 
-            <div class="tiebreaker-input-box">
-                <label for="tiebreaker_goals">
-                    Tiebreaker: Total Knockout Stage Goals
-                </label>
+            <div class="button-row">
+                <a href="{{ url_for('saved_brackets') }}" class="main-button">
+                    View Submitted Brackets
+                </a>
 
-                <p class="tiebreaker-helper">
-                    Predict the total number of goals scored across all knockout stage matches.
-                </p>
+                <a href="{{ url_for('leaderboard') }}" class="secondary-button">
+                    View Leaderboard
+                </a>
+            </div>
+        </div>
+    {% else %}
+        <form method="POST" action="{{ url_for('save_bracket') }}" id="save-bracket-form">
+            <div class="save-card">
+                <h2>Save Your Bracket</h2>
 
+                <label for="bracket_name">Bracket Name</label>
                 <input
-                    type="number"
-                    id="tiebreaker_goals"
-                    name="tiebreaker_goals"
-                    min="0"
-                    max="300"
-                    step="1"
-                    value="{{ tiebreaker_goals if tiebreaker_goals is defined and tiebreaker_goals is not none else '' }}"
-                    placeholder="Example: 118"
+                    type="text"
+                    id="bracket_name"
+                    name="bracket_name"
+                    value="{{ bracket_name if bracket_name else '' }}"
+                    placeholder="My World Cup Bracket"
                     required
                 >
-            </div>
 
-            <input type="hidden" name="knockout_picks" id="knockout-picks-input">
+                <div class="tiebreaker-input-box">
+                    <label for="tiebreaker_goals">
+                        Tiebreaker: Total Knockout Stage Goals
+                    </label>
 
-            <button type="submit" class="main-button">
-                {% if editing_bracket_id %}
-                    Update Bracket
-                {% else %}
+                    <p class="tiebreaker-helper">
+                        Predict the total number of goals scored across all knockout stage matches.
+                    </p>
+
+                    <input
+                        type="number"
+                        id="tiebreaker_goals"
+                        name="tiebreaker_goals"
+                        min="0"
+                        max="300"
+                        step="1"
+                        value="{{ tiebreaker_goals if tiebreaker_goals is defined and tiebreaker_goals is not none else '' }}"
+                        placeholder="Example: 118"
+                        required
+                    >
+                </div>
+
+                <input type="hidden" name="knockout_picks" id="knockout-picks-input">
+
+                <button type="submit" class="main-button">
                     Save Bracket
-                {% endif %}
-            </button>
-        </div>
-    </form>
+                </button>
+            </div>
+        </form>
+    {% endif %}
 
     <script id="saved-knockout-picks-data" type="application/json">
         {{ saved_knockout_picks | default(none) | tojson }}
@@ -873,7 +877,7 @@
     const saveForm = document.getElementById("save-bracket-form");
     const knockoutInput = document.getElementById("knockout-picks-input");
 
-    if (saveForm) {
+    if (saveForm && knockoutInput) {
         saveForm.addEventListener("submit", function () {
             const picks = collectKnockoutPicks();
             knockoutInput.value = JSON.stringify(picks);

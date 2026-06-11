@@ -24,16 +24,16 @@
                     {% if current_user %}
                         {% if user_has_bracket %}
                             <a href="{{ url_for('saved_brackets', error='limit_reached') }}" class="home-action-button primary-home-button">
-                                Create Bracket
+                                Bracket Builder
                             </a>
                         {% else %}
                             <a href="{{ url_for('new_bracket') }}" class="home-action-button primary-home-button">
-                                Create Bracket
+                                Bracket Builder
                             </a>
                         {% endif %}
                     {% else %}
                         <a href="{{ url_for('login', next=url_for('new_bracket')) }}" class="home-action-button primary-home-button">
-                            Create Bracket
+                            Bracket Builder
                         </a>
                     {% endif %}
 
