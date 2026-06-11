@@ -4147,6 +4147,71 @@ body::before {
     margin-top: 20px;
 }
 
+/* =========================
+   LEADERBOARD TABLE
+========================= */
+
+.leaderboard-standings-card {
+    margin-bottom: 28px;
+}
+
+.leaderboard-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    margin-top: 22px;
+}
+
+.leaderboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #050505;
+    color: white;
+    border: 3px solid white;
+}
+
+.leaderboard-table th,
+.leaderboard-table td {
+    padding: 14px 16px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    text-align: left;
+    font-weight: 800;
+}
+
+.leaderboard-table th {
+    background: #0057ff;
+    color: white;
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: 0.6px;
+}
+
+.leaderboard-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.leaderboard-table td:first-child,
+.leaderboard-table th:first-child {
+    text-align: center;
+    width: 80px;
+}
+
+.leaderboard-table a {
+    color: white;
+    font-weight: 1000;
+    text-decoration: underline;
+}
+
+.score-placeholder {
+    color: #facc15;
+    font-weight: 1000;
+}
+
+.leaderboard-empty {
+    text-align: center;
+    color: white;
+    font-weight: 900;
+    margin-top: 20px;
+}
 
 /* =========================
    SUBMISSIONS LOCKED CARD
